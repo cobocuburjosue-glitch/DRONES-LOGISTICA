@@ -285,6 +285,11 @@
   .switch[aria-checked=true]::after { left: 44px; }
   .switch[aria-checked=true] .txt { right: auto; left: 12px; }
   .switch:disabled { opacity: .6; }
+  .switches { display: flex; gap: 12px; flex: none; }
+  .switches label { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+  .switches small { color: var(--gris); font-size: .78rem; font-weight: 600; }
+  .fechas-todos { margin-bottom: 14px; border-left: 4px solid var(--azul-2); }
+  .fechas-todos small { color: var(--gris) !important; font-weight: 400; }
   td.cambio { white-space: normal; min-width: 120px; }
 
   .aviso { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%);
@@ -512,7 +517,7 @@
   <button type="button" class="chat-flotante" data-ir="chat" aria-label="Abrir Chat Equipo TACA">
     <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-5A8 8 0 1 1 21 12z"/></svg>
     <span class="globo" id="chatGlobo" hidden></span></button>
-  <p class="version">Versión 10 oct 2026 (4) · maestro de generadores y combustibles</p>
+  <p class="version">Versión 14 oct 2026 · edición de fechas y horómetro en General</p>
   <div class="pendientes" id="avisoPendientes" hidden>
     <span id="txtPendientes"></span><button type="button" id="btnReintentar">Sincronizar ahora</button>
   </div>
@@ -846,7 +851,11 @@
 
 <!-- ============ GENERAL APLICADO ============ -->
 <section id="general" class="pantalla ancha" hidden>
-  <div class="barra"><button class="volver" type="button" data-ir="menu">‹ Inicio</button><h2>General aplicado</h2></div>
+  <div class="barra"><button class="volver" type="button" data-ir="menu">‹ Inicio</button><h2 id="gTitulo">General aplicado</h2></div>
+  <div class="pestanas" role="tablist" id="gVista" hidden>
+    <button type="button" role="tab" id="gvGen" aria-selected="true">General aplicado</button>
+    <button type="button" role="tab" id="gvHoro" aria-selected="false">Horómetro piloto</button>
+  </div>
   <div class="filtros">
     <label><span>Desde</span><input type="date" id="gDesde"></label>
     <label><span>Hasta</span><input type="date" id="gHasta"></label>
@@ -881,6 +890,24 @@
   </div>
   <div class="vacio" id="gVacio" hidden><p id="gVacioTxt">No hay registros en esas fechas. Cambie el rango o anote un nuevo registro.</p>
     <button type="button" class="btn-editar" id="gReintentar" hidden>Reintentar</button></div>
+  <div id="gHoro" hidden>
+    <div class="totales cuatro">
+      <div><span class="num" id="ghV">0</span><small>Vuelos</small></div>
+      <div><span class="num" id="ghH">0</span><small>Horas de vuelo</small></div>
+      <div><span class="num" id="ghL">0</span><small>Litros asperjados</small></div>
+      <div><span class="num" id="ghN">0</span><small>Lecturas cargadas</small></div>
+    </div>
+    <div class="grafica"><h2>Horas de vuelo por día</h2><div class="lienzo" style="height:230px"><canvas id="chGhDia"></canvas></div></div>
+    <div class="dos-col">
+      <div class="grafica"><h2>Horas por drone</h2><div class="lienzo" id="cajaGhDrone"><canvas id="chGhDrone"></canvas></div></div>
+      <div class="grafica"><h2>Litros asperjados por drone</h2><div class="lienzo" id="cajaGhLitros"><canvas id="chGhLitros"></canvas></div></div>
+    </div>
+    <div class="grafica"><h2>Mis lecturas de horómetro</h2><p class="sub">Lectura final que subió y lo que sumó en el día</p>
+      <div class="tabla-envoltura"><table>
+        <thead><tr><th>Fecha</th><th>Drone</th><th class="n">Vuelos final</th><th class="n">Horas final</th><th class="n">Litros final</th><th class="n">Vuelos día</th><th class="n">Horas día</th><th class="n">Litros día</th><th>Fincas</th></tr></thead>
+        <tbody id="ghTabla"></tbody></table></div></div>
+  </div>
+  <p class="vacio" id="ghVacio" hidden>No hay lecturas de horómetro en esas fechas.</p>
   <div id="gMezclas" hidden>
     <h2 class="titulo-bloque">Mezclas TACA · variación</h2>
     <div class="totales cuatro">
@@ -921,7 +948,10 @@
 <!-- ============ PERMISOS DE EDICIÓN (solo Administrador) ============ -->
 <section id="permisos" class="pantalla ancha" hidden>
   <div class="barra"><button class="volver" type="button" data-ir="menu">‹ Inicio</button><h2>Permisos de edición</h2></div>
-  <p class="nota">Encienda el interruptor para que el usuario pueda editar sus registros (Detalle por finca y labor, Mezclas TACA y Horómetro piloto). Apáguelo cuando termine.</p>
+  <p class="nota"><b>Editar:</b> el usuario puede corregir sus registros (Detalle por finca y labor, Mezclas TACA y Horómetro piloto). <b>Fechas:</b> el usuario puede elegir la fecha al registrar y al editar; no se le muestra ningún aviso. Apáguelos cuando termine.</p>
+  <div class="fila-permiso fechas-todos" id="fechasTodosCaja" hidden>
+    <div class="info"><b>Edición de fechas · todos los usuarios</b><small>Permite elegir la fecha en los formularios y al editar registros. Los usuarios no reciben ningún aviso.</small></div>
+    <button type="button" class="switch" role="switch" aria-checked="false" aria-label="Edición de fechas para todos" id="swFechasTodos"><span class="txt">OFF</span></button></div>
   <div class="usuarios-permiso" id="listaPermisos"><p class="vacio">Cargando…</p></div>
   <div class="grafica" style="margin-top:18px"><h2>Registro de ediciones</h2><p class="sub">Últimos cambios hechos en los registros, con fecha y hora</p>
     <div class="tabla-envoltura"><table>
@@ -932,6 +962,7 @@
 <dialog id="dlgEditar">
   <div class="dlg-cab"><h2>Editar registro</h2><small id="eInfo"></small></div>
   <form id="formEditar" novalidate>
+    <label class="campo" id="eFechaCampo" hidden><span>Fecha</span><input type="date" id="eFecha"></label>
     <label class="campo"><span>Finca</span>
       <div class="auto"><input type="text" id="eFinca" class="mayus finca-auto" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false">
       <ul class="sugerencias" role="listbox" hidden></ul></div></label>
@@ -1161,7 +1192,7 @@ $('btnTema').onclick = () => {
 matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', () => { pintarTema(); redibujarGraficas(); });
 function redibujarGraficas() {
   if (!window.Chart) return;
-  if (!$('general').hidden && datosGeneral.length) pintarGeneral();
+  if (!$('general').hidden) pintarGeneral();
   if (!$('control').hidden) pintarControl();
 }
 
@@ -1381,6 +1412,22 @@ function decimal(inp, alCambiar) {
   });
 }
 
+/* ====== Fecha de los formularios ======
+   Normalmente es la fecha de hoy y no se puede cambiar. Si el Administrador habilitó la edición de fechas,
+   el campo pasa a ser un calendario (sin ningún aviso para el usuario). */
+const fechaLibre = () => !!sesion && (sesion.admin || !!(catalogos && catalogos.fechaLibre));
+function prepararFecha(id) {
+  const el = $(id);
+  if (fechaLibre()) {
+    const antes = /^\d{4}-\d{2}-\d{2}$/.test(el.value) ? el.value : hoyISO();
+    el.type = 'date'; el.readOnly = false; el.max = hoyISO(); el.value = antes > hoyISO() ? hoyISO() : antes;
+  } else { el.type = 'text'; el.readOnly = true; el.removeAttribute('max'); el.value = fechaLarga(hoyISO()); }
+}
+function leerFecha(id) {
+  const v = $(id).value;
+  return fechaLibre() && /^\d{4}-\d{2}-\d{2}$/.test(v) && v <= hoyISO() ? v : hoyISO();
+}
+
 /* ====== DASHBOARD VUELOS DRONES ====== */
 async function copiarTexto(t) {
   try { await navigator.clipboard.writeText(t); return true; }
@@ -1397,7 +1444,7 @@ $('dvAbrir').addEventListener('click', () => { copiarTexto($('dvUsuario').textCo
 const valoresCheck = {};
 const bateristasLista = () => ((catalogos && catalogos.integrantes) || []).filter(x => x.rol === 'BATERISTA').map(x => x.usuario).sort();
 function prepararCheck() {
-  $('cFecha').value = fechaLarga(hoyISO()); $('cEncargado').value = sesion.usuario;
+  prepararFecha('cFecha'); $('cEncargado').value = sesion.usuario;
   const sel = $('cBaterista'), antes = sel.value || store.get('ultBaterista', '');
   const lista = bateristasLista();
   sel.innerHTML = '<option value="">Seleccione el baterista</option>' + lista.map(b => `<option>${esc(b)}</option>`).join('')
@@ -1578,7 +1625,7 @@ $('formCheck').onsubmit = async e => {
   if (sinFoto) faltan.push(`${sinFoto} foto(s) de sección`);
   if (faltan.length) { err.textContent = 'Complete: ' + faltan.join(', ') + '.'; return; }
 
-  const reg = { accion: 'guardarChecklist', id: nuevoId(), fecha: hoyISO(), usuario: sesion.usuario, token: sesion.token,
+  const reg = { accion: 'guardarChecklist', id: nuevoId(), fecha: leerFecha('cFecha'), usuario: sesion.usuario, token: sesion.token,
     labor: $('cLabor').value, finca: $('cFinca').value.trim().toUpperCase(), camion: $('cCamion').value, km: $('cKm').value, campos, fotos,
     baterista: batSel === '__ninguno' ? '' : batSel };
   if ($('cObs').value.trim()) campos['Observaciones'] = $('cObs').value.trim();
@@ -1596,7 +1643,7 @@ $('formCheck').onsubmit = async e => {
 /* ====== NUEVO REGISTRO ====== */
 let seleccionDrones = new Set(), paramsManual = {};
 function prepararRegistro() {
-  $('fFecha').value = fechaLarga(hoyISO()); $('fUsuario').value = sesion.usuario;
+  prepararFecha('fFecha'); $('fUsuario').value = sesion.usuario;
   const ch = (store.get('checks', {})[sesion.usuario]) || {};
   const usar = ch.fecha === hoyISO() && !$('fLabor').value && !$('fFinca').value;
   if (usar) { $('fLabor').value = ch.labor; $('fCamion').value = ch.camion; $('fFinca').value = ch.finca; $('fLabor').onchange(); }
@@ -1683,7 +1730,7 @@ $('formRegistro').onsubmit = async e => {
   if (parametros.some(p => CAMPOS_P.some(([k]) => p[k] === ''))) faltan.push('parámetros del drone');
   if (faltan.length) { err.textContent = 'Complete: ' + faltan.join(', ') + '.'; return; }
 
-  const guardado = await encolar({ accion: 'guardar', id: nuevoId(), fecha: hoyISO(), usuario: sesion.usuario, token: sesion.token,
+  const guardado = await encolar({ accion: 'guardar', id: nuevoId(), fecha: leerFecha('fFecha'), usuario: sesion.usuario, token: sesion.token,
     labor: $('fLabor').value, camion: $('fCamion').value, drones: [...seleccionDrones], parametros,
     finca: $('fFinca').value.trim().toUpperCase(), litros: parseFloat(litTxt).toFixed(2), hectareas: parseFloat(haTxt).toFixed(2),
     supervisor: sup.supervisor, empresaSupervisor: sup.empresa, observaciones: $('fObs').value.trim() });
@@ -1806,6 +1853,7 @@ async function cargarGeneral() {
       `resumen:${sesion.usuario}:${desde}:${hasta}`, () => ultimaCopia(`resumen:${sesion.usuario}:`));
     datosGeneral = r.filas.filter(f => (!desde || f.fecha >= desde) && (!hasta || f.fecha <= hasta));
     mezclasGeneral = (r.mezclas || []).filter(f => (!desde || f.fecha >= desde) && (!hasta || f.fecha <= hasta));
+    horoGeneral = (r.horometros || []).filter(f => (!desde || f.fecha >= desde) && (!hasta || f.fecha <= hasta));
     permisoEd = { on: r.permiso && !guardado, solicitud: r.solicitud };
     avisoGuardado($('gGuardado'), guardado);
     generalInfo = { error: '', enRangoTodos: r.enRangoTodos || 0, desde, hasta };
@@ -1813,17 +1861,46 @@ async function cargarGeneral() {
     const msg = sinRed(err) ? 'Sin conexión y sin datos guardados para ver las gráficas.' : err.message;
     avisar(msg, true);
     generalInfo = { error: msg, desde, hasta };
-    datosGeneral = []; mezclasGeneral = []; pintarGeneral(); return;
+    datosGeneral = []; mezclasGeneral = []; horoGeneral = []; pintarGeneral(); return;
   }
   if (!sesion.admin) { datosGeneral = datosGeneral.filter(r => r.usuario === sesion.usuario); mezclasGeneral = mezclasGeneral.filter(r => r.usuario === sesion.usuario); }
   if (sesion.admin) {
-    const actual = $('gUsuario').value; const us = [...new Set(datosGeneral.concat(mezclasGeneral).map(r => r.usuario))].sort();
+    const actual = $('gUsuario').value; const us = [...new Set(datosGeneral.concat(mezclasGeneral, horoGeneral).map(r => r.usuario))].sort();
     $('gUsuario').innerHTML = '<option value="">Todos</option>' + us.map(u => `<option>${esc(u)}</option>`).join('');
     if (us.includes(actual)) $('gUsuario').value = actual;
   }
   pintarGeneral();
 }
-let mezclasGeneral = [], generalInfo = {};
+let mezclasGeneral = [], horoGeneral = [], generalInfo = {}, vistaGeneral = 'gen';
+/* Botón "Horómetro piloto" dentro de General: para pilotos (y el Administrador). */
+function elegirVistaGeneral(v) {
+  vistaGeneral = v;
+  $('gvGen').setAttribute('aria-selected', v === 'gen'); $('gvHoro').setAttribute('aria-selected', v === 'horo');
+  $('gTitulo').textContent = v === 'horo' ? 'Horómetro piloto' : 'General aplicado';
+  pintarGeneral();
+}
+$('gvGen').onclick = () => elegirVistaGeneral('gen');
+$('gvHoro').onclick = () => elegirVistaGeneral('horo');
+function pintarHoroGeneral(hs) {
+  $('ghVacio').hidden = hs.length > 0; $('gHoro').hidden = !hs.length;
+  if (!hs.length) return;
+  const sum = k => hs.reduce((s, h) => s + (Number(h[k]) || 0), 0);
+  $('ghV').textContent = fmt2(sum('vuelos')); $('ghH').textContent = fmt2(sum('horas')) + ' h'; $('ghL').textContent = fmt2(sum('litros')) + ' L'; $('ghN').textContent = hs.length;
+  $('ghTabla').innerHTML = hs.slice().sort((a, b) => b.fecha.localeCompare(a.fecha) || b.fila - a.fila).map(h => `<tr>
+    <td>${fechaLarga(h.fecha)}${sesion.admin ? `<br><small>${esc(h.usuario)}</small>` : ''}</td><td>${esc(h.drone)}</td>
+    <td class="n">${fmt2(h.vf)}</td><td class="n">${fmt2(h.hf)}</td><td class="n">${fmt2(h.lf)}</td>
+    <td class="n"><b>${fmt2(h.vuelos)}</b></td><td class="n"><b>${fmt2(h.horas)}</b></td><td class="n"><b>${fmt2(h.litros)}</b></td>
+    <td class="envolver">${esc(h.fincas)}</td></tr>`).join('');
+  if (!window.Chart) return;
+  estiloGraficas();
+  const suma = (k, campo) => { const m = {}; hs.forEach(h => m[h[k]] = (m[h[k]] || 0) + (Number(h[campo]) || 0)); return Object.entries(m); };
+  const dias = suma('fecha', 'horas').sort((a, b) => a[0].localeCompare(b[0]));
+  nueva('chGhDia', { type: 'bar', data: { labels: dias.map(d => fechaLarga(d[0]).slice(0, 5)), datasets: [{ data: dias.map(d => +d[1].toFixed(2)), backgroundColor: css('--serie1'), borderRadius: 6, maxBarThickness: 48 }] },
+    options: { maintainAspectRatio: false, scales: { x: { grid: { display: false } }, y: { beginAtZero: true, grid: { color: css('--rejilla') }, border: { display: false }, ticks: { callback: v => v + ' h' } } },
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => fmt2(c.parsed.y) + ' h' } } } } });
+  barrasHorizontales('chGhDrone', 'cajaGhDrone', suma('drone', 'horas').sort((a, b) => b[1] - a[1]), v => fmt2(v) + ' h', css('--serie1'));
+  barrasHorizontales('chGhLitros', 'cajaGhLitros', suma('drone', 'litros').sort((a, b) => b[1] - a[1]), v => fmt2(v) + ' L', css('--serie2'));
+}
 $('gReintentar').onclick = () => cargarGeneral();
 /* Mensaje cuando no hay nada que mostrar: dice de quién y de qué fechas, o el error del servidor. */
 function pintarVacioGeneral(u) {
@@ -1839,6 +1916,15 @@ function pintarGeneral() {
   const u = sesion.admin ? $('gUsuario').value : sesion.usuario;
   const filas = datosGeneral.filter(r => !u || r.usuario === u);
   const mz = mezclasGeneral.filter(r => !u || r.usuario === u);
+  const verHoro = esPiloto() || sesion.admin;
+  $('gVista').hidden = !verHoro;
+  if (!verHoro && vistaGeneral === 'horo') vistaGeneral = 'gen';
+  if (vistaGeneral === 'horo') {
+    ['gContenido', 'gMezclas', 'gVacio'].forEach(id => $(id).hidden = true);
+    pintarHoroGeneral(horoGeneral.filter(r => !u || r.usuario === u));
+    return;
+  }
+  $('gHoro').hidden = true; $('ghVacio').hidden = true;
   $('gVacio').hidden = filas.length > 0 || mz.length > 0; $('gContenido').hidden = !filas.length;
   if (!$('gVacio').hidden) pintarVacioGeneral(u || (sesion.admin ? 'ningún colaborador' : sesion.usuario));
   pintarMezclasGeneral(mz);
@@ -1925,6 +2011,7 @@ function abrirEditor(r) {
   $('eFinca').value = r.finca; $('eLabor').value = r.labor; $('eCamion').value = r.camion || cams[0] || '';
   $('eLitros').value = r.litros != null ? Number(r.litros).toFixed(2) : ''; $('eHa').value = Number(r.ha).toFixed(2);
   $('eObs').value = r.observaciones || ''; $('eError').textContent = '';
+  $('eFechaCampo').hidden = !fechaLibre(); $('eFecha').value = r.fecha; $('eFecha').max = hoyISO();
   llenarSupervisores($('eSupervisor')); ponerSupervisor('eSupervisor', r.supervisor || '');
   $('dlgEditar').showModal();
 }
@@ -1944,6 +2031,10 @@ $('formEditar').onsubmit = async e => {
   if ($('eLitros').value !== '' && Number($('eLitros').value) !== Number(r.litros)) cambios.litros = $('eLitros').value;
   if (Number($('eHa').value) !== Number(r.ha)) cambios.hectareas = $('eHa').value;
   if ($('eObs').value.trim() !== (r.observaciones || '')) cambios.observaciones = $('eObs').value.trim();
+  if (fechaLibre() && $('eFecha').value && $('eFecha').value !== r.fecha) {
+    if ($('eFecha').value > hoyISO()) { err.textContent = 'La fecha no puede ser futura.'; return; }
+    cambios.fecha = $('eFecha').value;
+  }
   const sup = leerSupervisor('eSupervisor');
   if (sup && sup.supervisor !== String(r.supervisor || '').toUpperCase()) { cambios.supervisor = sup.supervisor; cambios.empresaSupervisor = sup.empresa; }
   if (!Object.keys(cambios).length) { $('dlgEditar').close(); return; }
@@ -1964,9 +2055,25 @@ async function cargarPermisos() {
     $('listaPermisos').innerHTML = r.usuarios.map(u => `<div class="fila-permiso">
         <span class="mini-avatar">${esc(iniciales(u.usuario))}</span>
         <div class="info"><b>${esc(u.usuario)}</b>${u.solicitud && !u.permiso ? `<small>Solicitó permiso el ${esc(u.solicitud)}</small>` : ''}</div>
+        <div class="switches"><label><small>Editar</small>
         <button type="button" class="switch" role="switch" aria-checked="${u.permiso}" aria-label="Permiso de edición de ${esc(u.usuario)}" data-u="${esc(u.usuario)}">
-          <span class="txt">${u.permiso ? 'ON' : 'OFF'}</span></button></div>`).join('') || '<p class="vacio">No hay usuarios.</p>';
-    $('listaPermisos').querySelectorAll('.switch').forEach(sw => sw.onclick = async () => {
+          <span class="txt">${u.permiso ? 'ON' : 'OFF'}</span></button></label>
+        <label><small>Fechas</small>
+        <button type="button" class="switch sw-fecha" role="switch" aria-checked="${!!u.fechas}" aria-label="Edición de fechas de ${esc(u.usuario)}" data-f="${esc(u.usuario)}">
+          <span class="txt">${u.fechas ? 'ON' : 'OFF'}</span></button></label></div></div>`).join('') || '<p class="vacio">No hay usuarios.</p>';
+    const swT = $('swFechasTodos'); $('fechasTodosCaja').hidden = false;
+    const marcarSw = (sw, on) => { sw.setAttribute('aria-checked', on); sw.querySelector('.txt').textContent = on ? 'ON' : 'OFF'; };
+    marcarSw(swT, !!r.fechasTodos);
+    const cambiarF = async (sw, datos, texto) => {
+      const nuevo = sw.getAttribute('aria-checked') !== 'true'; sw.disabled = true;
+      try { await api(Object.assign({ accion: 'cambiarFechas', usuario: sesion.usuario, token: sesion.token, estado: nuevo }, datos)); marcarSw(sw, nuevo);
+        avisar(`${texto}: edición de fechas ${nuevo ? 'habilitada' : 'deshabilitada'}.`); }
+      catch (err) { avisar(sinRed(err) ? 'Sin conexión.' : err.message, true); }
+      finally { sw.disabled = false; }
+    };
+    swT.onclick = () => cambiarF(swT, { todos: true }, 'Todos los usuarios');
+    $('listaPermisos').querySelectorAll('.sw-fecha').forEach(sw => sw.onclick = () => cambiarF(sw, { objetivo: sw.dataset.f }, sw.dataset.f));
+    $('listaPermisos').querySelectorAll('.switch[data-u]').forEach(sw => sw.onclick = async () => {
       const nuevo = sw.getAttribute('aria-checked') !== 'true'; sw.disabled = true;
       try {
         await api({ accion: 'cambiarPermiso', usuario: sesion.usuario, token: sesion.token, objetivo: sw.dataset.u, estado: nuevo });
@@ -2176,7 +2283,7 @@ const H_CAMPOS = ['hVf', 'hHf', 'hLf', 'hObs'];
 let fincasHoro = [];
 const ultimoCierre = d => d && catalogos.horometros ? catalogos.horometros[d] : null;
 function prepararHoro() {
-  $('hFecha').value = fechaLarga(hoyISO()); $('hPiloto').value = sesion.usuario;
+  prepararFecha('hFecha'); $('hPiloto').value = sesion.usuario;
   llenarDrones($('hDrone'), 'Seleccione el drone');
   bd.get('borrador:horo:' + sesion.usuario).then(b => {
     if (b) {
@@ -2236,12 +2343,13 @@ $('formHoro').onsubmit = async e => {
   const drone = $('hDrone').value, u = ultimoCierre(drone);
   if (u && (v.vf < u.vuelos || v.hf < u.horas || v.lf < u.litros) &&
       !confirm(`Alguna lectura es menor que el último cierre de ${drone} (${fmt2(u.vuelos)} vuelos, ${fmt2(u.horas)} h, ${fmt2(u.litros)} L). ¿Guardar de todos modos? (por ejemplo, si el contador del drone se reinició)`)) return;
-  const ok = await encolar({ accion: 'guardarHorometro', id: nuevoId(), fecha: hoyISO(), usuario: sesion.usuario, token: sesion.token,
+  const fechaHoro = leerFecha('hFecha');
+  const ok = await encolar({ accion: 'guardarHorometro', id: nuevoId(), fecha: fechaHoro, usuario: sesion.usuario, token: sesion.token,
     drone, vf: v.vf, hf: $('hHf').value.trim(), lf: v.lf, fincas: fincasHoro.slice(), observaciones: $('hObs').value.trim() });
   if (!ok) return;
   // este cierre será la base del próximo, aunque no haya señal
   catalogos.horometros = catalogos.horometros || {};
-  catalogos.horometros[drone] = { fecha: hoyISO(), piloto: sesion.usuario, vuelos: v.vf, horas: Math.round(v.hf * 100) / 100, litros: v.lf };
+  catalogos.horometros[drone] = { fecha: fechaHoro, piloto: sesion.usuario, vuelos: v.vf, horas: Math.round(v.hf * 100) / 100, litros: v.lf };
   store.set('catalogos', catalogos);
   await bd.del('borrador:horo:' + sesion.usuario).catch(() => {});
   $('formHoro').reset(); fincasHoro = []; pintarFincasHoro(); calcularHoro(); pintarUltimo();
@@ -2307,7 +2415,7 @@ $('formConv').onsubmit = e => {
 /* ====== MEZCLAS TACA ====== */
 let fotoMezcla = '';
 function prepararMezcla() {
-  $('mFecha').value = fechaLarga(hoyISO()); $('mUsuario').value = sesion.usuario;
+  prepararFecha('mFecha'); $('mUsuario').value = sesion.usuario;
   $('mUsuarioTxt').textContent = esPiloto() ? 'Piloto' : 'Baterista';
   $('mFotoCaja').hidden = esPiloto();   // el piloto registra la mezcla sin foto
   llenarSupervisores($('mSupervisor')); llenarProductos($('mProducto'));
@@ -2369,7 +2477,7 @@ $('formMezcla').onsubmit = async e => {
   if (!fotoMezcla && !esPiloto()) { faltan.push('foto de la mezcla'); $('mFotoCaja').classList.add('falta'); }
   if (faltan.length) { err.textContent = 'Complete: ' + faltan.join(', ') + '.'; return; }
   if (so > t) { err.textContent = 'Los litros sobrantes no pueden ser más que los totales.'; return; }
-  const ok = await encolar({ accion: 'guardarMezcla', id: nuevoId(), fecha: hoyISO(), usuario: sesion.usuario, token: sesion.token,
+  const ok = await encolar({ accion: 'guardarMezcla', id: nuevoId(), fecha: leerFecha('mFecha'), usuario: sesion.usuario, token: sesion.token,
     finca: $('mFinca').value.trim().toUpperCase(), supervisor: sup.supervisor, empresa: sup.empresa, productos: prod,
     total: t, sobrante: so, lph: $('mLph').value, ha: $('mHa').value, foto: esPiloto() ? '' : fotoMezcla, observaciones: $('mObs').value.trim() });
   if (!ok) return;
@@ -2420,13 +2528,13 @@ async function cargarMisRegistros(tipo) {
 /* ====== Editor genérico (mezclas y horómetro) ====== */
 const FORM_EDIT = {
   mezcla: { titulo: 'Editar mezcla', campos: [
-    { k: 'finca', l: 'Finca', t: 'finca' }, { k: 'supervisor', l: 'Supervisor de aplicación', t: 'supervisor' },
+    { k: 'fecha', l: 'Fecha', t: 'fecha' }, { k: 'finca', l: 'Finca', t: 'finca' }, { k: 'supervisor', l: 'Supervisor de aplicación', t: 'supervisor' },
     { k: 'productos', l: 'Productos de la mezcla', t: 'producto' },
     { k: 'total', l: 'Litros totales', t: 'num', par: 1 }, { k: 'sobrante', l: 'Litros sobrantes', t: 'num', par: 2 },
     { k: 'lph', l: 'Litros por ha', t: 'num', opc: 1, par: 1 }, { k: 'ha', l: 'Cantidad de ha', t: 'num', opc: 1, par: 2 },
     { k: 'observaciones', l: 'Observaciones', t: 'area' }] },
   horometro: { titulo: 'Editar horómetro', campos: [
-    { k: 'drone', l: 'Drone', t: 'drone' },
+    { k: 'fecha', l: 'Fecha', t: 'fecha' }, { k: 'drone', l: 'Drone', t: 'drone' },
     { k: 'vf', l: 'Vuelos final', t: 'num', par: 1 }, { k: 'vi', l: 'Vuelos inicio (cierre anterior)', t: 'num', opc: 1, par: 2 },
     { k: 'hf', l: 'Horas final', t: 'horas', par: 1 }, { k: 'hi', l: 'Horas inicio (cierre anterior)', t: 'horas', opc: 1, par: 2 },
     { k: 'lf', l: 'Litros final', t: 'num', par: 1 }, { k: 'li', l: 'Litros inicio (cierre anterior)', t: 'num', opc: 1, par: 2 },
@@ -2436,8 +2544,9 @@ const FORM_EDIT = {
 let editandoFila = null;
 function abrirEditorFila(tipo, r, alGuardar) {
   if (!r) return;
-  const def = FORM_EDIT[tipo];
-  editandoFila = { tipo, r, alGuardar };
+  const base = FORM_EDIT[tipo];
+  const def = Object.assign({}, base, { campos: base.campos.filter(c => c.t !== 'fecha' || fechaLibre()) });
+  editandoFila = { tipo, r, alGuardar, def };
   $('dfTitulo').textContent = def.titulo;
   $('dfInfo').textContent = `${fechaLarga(r.fecha)} · ${r.usuario}`;
   const campo = c => {
@@ -2446,6 +2555,7 @@ function abrirEditorFila(tipo, r, alGuardar) {
     if (c.t === 'supervisor') return `<div class="campo"><label class="campo-titulo" for="${id}">${c.l}</label><select id="${id}" class="sel-sup"></select><input type="text" id="${id}Otro" class="mayus" hidden style="margin-top:8px" placeholder="Escriba el nombre del supervisor"></div>`;
     if (c.t === 'producto') return `<div class="campo"><label class="campo-titulo" for="${id}">${c.l}</label><select id="${id}"></select><input type="text" id="${id}Otro" class="mayus" hidden style="margin-top:8px"></div>`;
     if (c.t === 'drone') return `<label class="campo"><span>${c.l}</span><select id="${id}"></select></label>`;
+    if (c.t === 'fecha') return `<label class="campo"><span>${c.l}</span><input type="date" id="${id}" max="${hoyISO()}"></label>`;
     if (c.t === 'area') return `<label class="campo"><span>${c.l}${opc}</span><textarea id="${id}"></textarea></label>`;
     return `<label class="campo"><span>${c.l}${opc}</span><input type="text" id="${id}" ${c.t === 'texto' ? '' : 'inputmode="decimal"'} ${c.mayus ? 'class="mayus"' : ''}></label>`;
   };
@@ -2476,7 +2586,7 @@ function abrirEditorFila(tipo, r, alGuardar) {
 $('btnCancelarFila').onclick = () => $('dlgFila').close();
 $('formFila').onsubmit = async e => {
   e.preventDefault();
-  const { tipo, r, alGuardar } = editandoFila, def = FORM_EDIT[tipo], cambios = {};
+  const { tipo, r, alGuardar, def } = editandoFila, cambios = {};
   def.campos.forEach(c => {
     const id = 'df_' + c.k;
     if (c.t === 'supervisor') {
@@ -2484,6 +2594,7 @@ $('formFila').onsubmit = async e => {
       if (s2 && s2.supervisor !== String(r.supervisor || '').toUpperCase()) { cambios.supervisor = s2.supervisor; cambios.empresa = s2.empresa; }
       return;
     }
+    if (c.t === 'fecha') { const f = $(id).value; if (f && f !== r.fecha) cambios.fecha = f; return; }
     let v = c.t === 'producto' ? leerProducto(id) : $(id).value.trim();
     if (c.t === 'finca' || c.mayus) v = v.toUpperCase();
     const antes = r[c.k] == null ? '' : String(r[c.k]);
