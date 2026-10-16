@@ -2,14 +2,15 @@
    1. Guarda la app para abrirla sin señal (siempre intenta traer la versión más nueva primero).
    2. Guarda la librería de gráficas y las fuentes para ver gráficas sin señal.
    3. Envía los registros pendientes en segundo plano cuando vuelve la señal (Background Sync en Android). */
-const CACHE = 'taca-v13';
+const CACHE = 'taca-v14';
 const ARCHIVOS = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png'];
 const OPCIONALES = ['./chart.umd.js', 'https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js'];
 const API_POR_DEFECTO = 'https://script.google.com/macros/s/AKfycbwIbnegW9MqqQ8S0y_06nCOdHvtf2rHyTRaovvJxlw58KXLXdji0sP3infV3nddNXbP/exec';
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(async c => {
-    await c.addAll(ARCHIVOS);
+    // cache: 'reload' = siempre pide la versión nueva a GitHub (no la copia guardada del navegador)
+    await c.addAll(ARCHIVOS.map(u => new Request(u, { cache: 'reload' })));
     // la librería de gráficas: si falta un archivo, la app se instala igual
     await Promise.all(OPCIONALES.map(u => fetch(u).then(r => r.ok && c.put(u, r)).catch(() => {})));
   }).then(() => self.skipWaiting()));
@@ -40,7 +41,7 @@ self.addEventListener('fetch', e => {
 
   if (url.origin !== location.origin) return;
   e.respondWith(
-    fetch(req)
+    fetch(new Request(req.url, { cache: 'no-cache', credentials: 'same-origin' }))   // revisa con GitHub si hay versión nueva cada vez que hay señal
       .then(res => { const copia = res.clone(); caches.open(CACHE).then(c => c.put(req, copia)); return res; })
       .catch(() => caches.match(req).then(r => r || caches.match('./index.html')))
   );
