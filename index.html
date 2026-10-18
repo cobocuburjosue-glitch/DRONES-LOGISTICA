@@ -535,7 +535,7 @@
   <button type="button" class="chat-flotante" data-ir="chat" aria-label="Abrir Chat Equipo TACA">
     <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-5A8 8 0 1 1 21 12z"/></svg>
     <span class="globo" id="chatGlobo" hidden></span></button>
-  <p class="version">Versión 17 oct 2026 (2) · check list por camión y observaciones</p>
+  <p class="version">Versión 17 oct 2026 (3) · horas anterior de generadores</p>
   <div class="pendientes" id="avisoPendientes" hidden>
     <span id="txtPendientes"></span><button type="button" id="btnReintentar">Sincronizar ahora</button>
   </div>
@@ -814,7 +814,7 @@
         <select id="geFiltro" style="max-width:260px"><option value="">Todos los generadores</option></select></div>
       <p class="sub">Lo que anotaron en el check list (sección Generadores), del rango de fechas elegido</p>
       <div class="tabla-envoltura"><table>
-        <thead><tr><th>Fecha</th><th>Generador</th><th class="n">Horas del día</th><th class="n">Acumulado</th><th class="n">Faltan / pasado</th><th>Estado</th><th>Servicio</th><th class="n">Combustible</th><th>Anotó</th><th>Camión</th><th>Observaciones</th></tr></thead>
+        <thead><tr><th>Fecha</th><th>Generador</th><th class="n">Anterior</th><th class="n">Horas del día</th><th class="n">Acumulado</th><th class="n">Faltan / pasado</th><th>Estado</th><th>Servicio</th><th class="n">Combustible</th><th>Anotó</th><th>Camión</th><th>Observaciones</th></tr></thead>
         <tbody id="geTabla"></tbody></table></div></div>
   </div>
   <div id="ctlComb" role="tabpanel" hidden>
@@ -1538,7 +1538,11 @@ function pintarSecciones() {
             <input type="text" class="mayus gen-otro" data-g="${g}" placeholder="Ej. GENERADOR 506" hidden style="margin-top:8px">
             <input type="hidden" data-col="Generador ${g} Número" data-nombre="número del generador ${g}" data-req="1"></div>
           <div class="gen-datos">
-          <label class="campo" style="margin-bottom:6px"><span>Horas trabajadas en el día</span><input type="text" inputmode="decimal" class="dec gen-hrs" data-col="Generador ${g} Horas Trabajadas" data-nombre="horas trabajadas del generador ${g}" data-req="1" placeholder="Ej. 8"></label>
+          <div class="fila2" style="margin-bottom:6px">
+            <label class="campo" style="margin:0"><span>Horas trabajadas anterior</span><input type="text" inputmode="decimal" class="dec gen-ant" data-col="Generador ${g} Horas Anterior" data-nombre="horas trabajadas anterior del generador ${g}" data-req="1" placeholder="0"></label>
+            <label class="campo" style="margin:0"><span>Horas trabajadas hoy</span><input type="text" inputmode="decimal" class="dec gen-hrs" data-col="Generador ${g} Horas Trabajadas" data-nombre="horas trabajadas hoy del generador ${g}" data-req="1" placeholder="Ej. 8"></label>
+          </div>
+          <div class="ayuda gen-ant-ayuda" style="margin:-2px 0 6px">Anterior = horas acumuladas desde el último servicio. La app la llena con lo que lleva; corríjala si no coincide.</div>
           <div class="gen-conteo" data-falta="${g}" hidden></div>
           <div class="item gen-serv" data-col="Generador ${g} Servicio" data-req="1"><div class="nombre">¿Se le hizo servicio hoy?</div>
             <div class="tri">${['NO', 'SI'].map(v => `<button type="button" data-v="${v}" aria-pressed="false">${v === 'SI' ? 'Sí' : 'No'}</button>`).join('')}</div></div>
@@ -1598,7 +1602,7 @@ function pintarSecciones() {
   if (cg) [cg, cp].forEach(i => i.addEventListener('input', () => totalQ(cg, cp, $('camTot'))));
   cont.querySelectorAll('.generador').forEach(gb => {
     const g = gb.dataset.gen, sel = gb.querySelector('.gen-num'), otro = gb.querySelector('.gen-otro'), oculto = gb.querySelector(`[data-col="Generador ${g} Número"]`);
-    const hrs = gb.querySelector(`[data-col="Generador ${g} Horas Trabajadas"]`);
+    const hrs = gb.querySelector(`[data-col="Generador ${g} Horas Trabajadas"]`), ant = gb.querySelector('.gen-ant');
     const serv = gb.querySelector('.gen-serv'), foto = gb.querySelector('.gen-foto-serv'), datosG = gb.querySelector('.gen-datos');
     const intervalo = (catalogos && catalogos.intervaloGen) || 50;
     const numero = () => sel.value === OTRO ? otro.value.trim().toUpperCase() : sel.value === '__no' ? '' : sel.value;
@@ -1606,12 +1610,13 @@ function pintarSecciones() {
     const pintar = () => {
       const el = gb.querySelector('.gen-conteo'), n = numero();
       if (!n) { el.hidden = true; return; }
-      const e = (catalogos.genEstado || {})[n] || {}, previo = serv.dataset.valor === 'SI' ? 0 : (e.acum || 0);
-      const h = parseFloat(hrs.value), total = previo + (isNaN(h) ? 0 : h), faltan = intervalo - total;
+      const e = (catalogos.genEstado || {})[n] || {};
+      const a = parseFloat(ant.value), previo = serv.dataset.valor === 'SI' ? 0 : (isNaN(a) ? (e.acum || 0) : a);
+      const h = parseFloat(hrs.value), total = Math.round((previo + (isNaN(h) ? 0 : h)) * 100) / 100, faltan = intervalo - total;
       const est = total >= intervalo ? 'rojo' : faltan <= UMBRAL_GEN ? 'amarillo' : 'verde';
       const ultimo = e.servicioFecha ? `Último servicio: ${fechaLarga(e.servicioFecha)}.` : 'Sin servicio registrado en la app.';
       el.className = 'gen-conteo ' + est; el.hidden = false;
-      el.innerHTML = `<b>${ha(total)} de ${intervalo} h</b> ${serv.dataset.valor === 'SI' ? '(con el servicio de hoy el conteo empieza de nuevo)' : `desde el último servicio${isNaN(h) ? '' : ' contando hoy'}`}.
+      el.innerHTML = `${serv.dataset.valor === 'SI' ? '' : `${ha(previo)} h anterior + ${isNaN(h) ? 0 : ha(h)} h hoy = `}<b>${ha(total)} de ${intervalo} h</b> ${serv.dataset.valor === 'SI' ? '(con el servicio de hoy el conteo empieza de nuevo: solo cuentan las horas de hoy)' : 'desde el último servicio'}.
         ${total > intervalo ? `<br><b>Pasado por ${ha(total - intervalo)} h: hacer mantenimiento ya.</b>` : total >= intervalo ? '<br><b>Llegó a 50 h: toca mantenimiento.</b>' : `<br>Faltan ${ha(faltan)} h para el mantenimiento.`}
         <small>${ultimo}</small>`;
     };
@@ -1621,10 +1626,14 @@ function pintarSecciones() {
       datosG.hidden = noUsado;
       datosG.querySelectorAll('[data-req]').forEach(x => x.dataset.req = noUsado ? '' : '1');
       oculto.value = noUsado ? '' : numero(); oculto.dataset.req = noUsado ? '' : '1';
+      // horas anterior: lo que lleva acumulado ese generador desde su último servicio (se puede corregir)
+      const e = (catalogos.genEstado || {})[numero()];
+      ant.dataset.manual = ''; ant.value = e ? String(e.acum || 0) : '0';
       pintar();
     };
     sel.onchange = cambiarNumero; otro.addEventListener('input', () => { oculto.value = numero(); pintar(); });
     hrs.addEventListener('input', pintar);
+    ant.addEventListener('input', () => { ant.dataset.manual = '1'; pintar(); });
     serv.querySelectorAll('button').forEach(b => b.addEventListener('click', () => { foto.hidden = b.dataset.v !== 'SI'; pintar(); }));
     const gal = gb.querySelector('.gen-gal'), pre = gb.querySelector('.gen-pre'), tot = gb.querySelector('.gen-tot');
     [gal, pre].forEach(i => i.addEventListener('input', () => totalQ(gal, pre, tot)));
@@ -1667,7 +1676,7 @@ $('formCheck').onsubmit = async e => {
   if (campos['Combustible Antes'] || campos['Combustible Después'])
     campos['Estado Combustible'] = `Antes ${campos['Combustible Antes'] || '-'} / Después ${campos['Combustible Después'] || '-'}`;
   if (sinMarcar) faltan.push(`${sinMarcar} elemento(s) sin marcar`);
-  for (let g = 1; g <= 5; g++) if (campos[`Generador ${g} Horas Trabajadas`] > 24) { err.textContent = `Generador ${g}: las horas del día no pueden ser más de 24.`; return; }
+  for (let g = 1; g <= 5; g++) if (campos[`Generador ${g} Horas Trabajadas`] > 24) { err.textContent = `Generador ${g}: las horas de hoy no pueden ser más de 24.`; return; }
   const fotos = {}; let sinFoto = 0;
   $('cSecciones').querySelectorAll('.foto-sec').forEach(c => {
     if (c.hidden || c.closest('[hidden]')) return;   // foto de servicio solo si se hizo servicio
@@ -2754,8 +2763,10 @@ function lecturasGeneradores() {
     const id = g.numero || `GENERADOR ${g.pos} · ${c.camion || 'sin camión'}`;
     const a = acum[id] = acum[id] || { horas: 0, servicio: null };
     if (g.servicio) { a.horas = 0; a.servicio = { fecha: c.fecha, foto: g.fotoServicio }; }   // el servicio reinicia el conteo
+    else if (g.anterior != null) a.horas = g.anterior;   // "horas trabajadas anterior" anotada en el check list
+    const anterior = a.horas;
     a.horas = Math.round((a.horas + (g.horas || 0)) * 100) / 100;
-    out.push({ id, fecha: c.fecha, fila: c.fila, usuario: c.usuario, camion: c.camion, finca: c.finca, horasDia: g.horas, acumulado: a.horas,
+    out.push({ id, fecha: c.fecha, fila: c.fila, usuario: c.usuario, camion: c.camion, finca: c.finca, horasDia: g.horas, acumulado: a.horas, anterior,
       faltan: Math.round((tope - a.horas) * 100) / 100, ultimoServicio: a.servicio, obs: c.obsGeneradores,
       servicio: g.servicio, fotoServicio: g.fotoServicio, galones: g.galones, tipo: g.tipo, total: g.total });
   }));
@@ -2791,7 +2802,7 @@ function pintarGeneradores(quien) {
   // historial por generador (no por usuario)
   const hist = todas.filter(l => (!fsel.value || l.id === fsel.value) && (!d.desde || l.fecha >= d.desde) && (!d.hasta || l.fecha <= d.hasta));
   $('geTabla').innerHTML = hist.map(l => { const e = estadoGen(l.faltan); return `<tr><td>${fechaLarga(l.fecha)}</td><td>${esc(l.id)}</td>
-    <td class="n">${l.horasDia != null ? ha(l.horasDia) : '—'}</td><td class="n"><b>${ha(l.acumulado)}</b> / ${datosControl.intervaloGen || 50}</td>
+    <td class="n">${l.servicio ? '<small>servicio</small>' : ha(l.anterior)}</td><td class="n">${l.horasDia != null ? ha(l.horasDia) : '—'}</td><td class="n"><b>${ha(l.acumulado)}</b> / ${datosControl.intervaloGen || 50}</td>
     <td class="n">${l.faltan < 0 ? `+${ha(-l.faltan)} pasado` : ha(l.faltan)}</td><td><span class="estado-gen ${e.c}">${e.t}</span></td>
     <td>${l.servicio ? `<span class="tag ok">Servicio</span>${l.fotoServicio ? ` <a href="${esc(l.fotoServicio)}" target="_blank" rel="noopener">foto</a>` : ''}` : '—'}</td>
     <td class="n">${l.galones != null ? `${ha(l.galones)} gal${l.tipo ? '<br><small>' + esc(l.tipo) + '</small>' : ''}` : '—'}</td>
