@@ -311,7 +311,14 @@
   .totales div { background: var(--papel); padding: 14px 12px; }
   .totales.cuatro { grid-template-columns: repeat(2, 1fr); }
   .pestanas.cuatro { grid-template-columns: repeat(2, 1fr); }
-  @media (min-width: 820px) { .pestanas.cuatro { grid-template-columns: repeat(5, 1fr); } }
+  @media (min-width: 820px) { .pestanas.cuatro { grid-template-columns: repeat(6, 1fr); } }
+  .obs-dia { margin-bottom: 14px; }
+  .obs-dia > h3 { font-size: 1rem; margin: 0 0 8px; color: var(--azul-texto); }
+  .obs-item { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; background: var(--papel); border: 1.5px solid var(--linea); border-left: 4px solid var(--azul-2); border-radius: 10px; padding: 10px 12px; margin-bottom: 8px; }
+  .obs-item.falla, .obs-item.mal { border-left-color: var(--alerta); } .obs-item.regular { border-left-color: var(--amarillo); }
+  .obs-item .origen { font-size: .78rem; font-weight: 700; padding: 2px 8px; border-radius: 999px; background: var(--papel-2); color: var(--azul-texto); align-self: start; white-space: nowrap; }
+  .obs-item.falla .origen, .obs-item.mal .origen { background: var(--rojo-fondo); color: var(--alerta); }
+  .obs-item .quien { font-size: .85rem; color: var(--gris); } .obs-item p { margin: 2px 0 0; grid-column: 2; }
   .gen-grid { display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 18px; }
   @media (min-width: 640px) { .gen-grid { grid-template-columns: repeat(2, 1fr); } }
   @media (min-width: 980px) { .gen-grid { grid-template-columns: repeat(3, 1fr); } }
@@ -390,6 +397,8 @@
   .horo .dif.mal { color: var(--alerta); background: var(--alerta-fondo); }
   .multi { border: 1.5px solid var(--linea); border-radius: 10px; padding: 8px; background: var(--papel); }
   .multi .chips { margin: 0 0 6px; }
+  .equipo-lista small { display: block; color: var(--gris); font-weight: 600; margin: 8px 0 2px; }
+  #cEquipoCampo.falta .equipo-lista { outline: 2px solid var(--alerta); outline-offset: 4px; border-radius: 8px; }
   .multi .chips:empty { display: none; }
   .multi input { border: 0; min-height: 40px; padding: 6px; box-shadow: none !important; }
 
@@ -512,21 +521,21 @@
   </div>
   <div class="menu">
     <button class="opcion chat-opcion" type="button" data-ir="chat"><strong>Chat Equipo TACA</strong><span>Mensajes con todos los usuarios registrados</span><em class="estado pend" id="estadoChat" hidden></em></button>
-    <button class="opcion solo-piloto-admin" type="button" data-ir="checklist" hidden><strong>Check list</strong><span>Revisión del equipo, junto a su baterista</span><em class="estado" id="estadoCheck"></em></button>
+    <button class="opcion solo-piloto-admin" type="button" data-ir="checklist" hidden><strong>Check list</strong><span>Uno por camión al día, lo llena el encargado con su equipo</span><em class="estado" id="estadoCheck"></em></button>
     <button class="opcion" type="button" data-ir="registro"><strong>Nuevo registro</strong><span>Anotar finca, labor y hectáreas aplicadas</span></button>
     <button class="opcion solo-piloto" type="button" data-ir="horometro" hidden><strong>Horómetro piloto</strong><span>Lecturas finales de vuelos, horas y litros asperjados</span></button>
     <button class="opcion solo-piloto" type="button" data-ir="convertidor" hidden><strong>Convertidor de flujos</strong><span>Calcule a cuánto debe ir la bomba del drone</span></button>
     <button class="opcion solo-campo" type="button" data-ir="mezclas" hidden><strong>Mezclas TACA</strong><span id="mezclaOpcionTxt">Registrar la mezcla preparada y ver su variación</span></button>
     <button class="opcion solo-piloto-admin" type="button" data-ir="vuelos" hidden><strong>Dashboard vuelos drones</strong><span>Vuelos de los pilotos: variación real contra L/ha teóricos</span></button>
     <button class="opcion negra" type="button" data-ir="general"><strong>General aplicado</strong><span>Gráficas por finca y labor, filtradas por fecha</span></button>
-    <button class="opcion negra solo-admin" type="button" data-ir="control" hidden><strong>Centro de control</strong><span>Mezclas, horómetro y check list del equipo, con gráficas</span></button>
+    <button class="opcion negra solo-admin" type="button" data-ir="control" hidden><strong>Centro de control</strong><span>Mezclas, horómetro, check list, generadores, combustibles y observaciones</span></button>
     <button class="opcion negra" type="button" data-ir="permisos" id="opPermisos" hidden><strong>Permisos de edición</strong><span>Habilitar a quién puede corregir datos y ver el registro de cambios</span><em class="estado pend" id="estadoSolicitudes" hidden></em></button>
     <button class="opcion negra" type="button" data-ir="reportes" id="opReportes" hidden><strong>Generar reportes</strong><span>Enviar a cada usuario el resumen corporativo de su semana</span></button>
   </div>
   <button type="button" class="chat-flotante" data-ir="chat" aria-label="Abrir Chat Equipo TACA">
     <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-5A8 8 0 1 1 21 12z"/></svg>
     <span class="globo" id="chatGlobo" hidden></span></button>
-  <p class="version">Versión 17 oct 2026 · conteo de horas de generadores</p>
+  <p class="version">Versión 17 oct 2026 (2) · check list por camión y observaciones</p>
   <div class="pendientes" id="avisoPendientes" hidden>
     <span id="txtPendientes"></span><button type="button" id="btnReintentar">Sincronizar ahora</button>
   </div>
@@ -538,11 +547,11 @@
   <form id="formCheck" novalidate>
     <div class="fila2">
       <label class="campo"><span>Fecha</span><input type="text" id="cFecha" readonly></label>
-      <label class="campo"><span>Piloto encargado</span><input type="text" id="cEncargado" readonly></label>
+      <label class="campo"><span>Encargado del día</span><input type="text" id="cEncargado" readonly></label>
     </div>
-    <div class="campo"><label class="campo-titulo" for="cBaterista">Baterista</label>
-      <select id="cBaterista"></select>
-      <div class="ayuda">Elija el baterista que anduvo con usted. El check list lo llenan juntos y también cuenta para él.</div></div>
+    <div class="campo" id="cEquipoCampo"><span class="campo-titulo">Elija a su equipo del día de hoy</span>
+      <div id="cEquipo" class="equipo-lista"></div>
+      <div class="ayuda">Toque a los pilotos y bateristas que trabajan con usted hoy. El check list lo llenan juntos, se llena uno por camión y cuenta para todos los que elija.</div></div>
     <label class="campo"><span>Labor ejecutada</span>
       <select id="cLabor" required><option value="">Seleccione su labor</option></select>
       <div class="ayuda" id="cRol">Al elegir la labor aparecen solo las secciones que le corresponden.</div></label>
@@ -554,6 +563,7 @@
       <label class="campo"><span>Camión</span><select id="cCamion"><option value="">Seleccione</option></select></label>
       <label class="campo"><span>Kilómetros</span><input type="text" id="cKm" inputmode="decimal" placeholder="0"></label>
     </div>
+    <div class="aviso-info ambar" id="cCamionAviso" hidden></div>
     <div id="cSecciones"></div>
     <label class="campo" id="cObsCampo" hidden><span>Observaciones generales <span class="opcional">(opcional)</span></span><textarea id="cObs" placeholder="Algo que deba saber el Administrador sobre el equipo o la jornada"></textarea></label>
     <p class="error-txt" id="checkError" role="alert"></p>
@@ -720,6 +730,7 @@
     <button type="button" role="tab" id="tabCk" aria-selected="false" aria-controls="ctlCheck">Check list</button>
     <button type="button" role="tab" id="tabGe" aria-selected="false" aria-controls="ctlGen">Generadores</button>
     <button type="button" role="tab" id="tabCo" aria-selected="false" aria-controls="ctlComb">Combustibles</button>
+    <button type="button" role="tab" id="tabOb" aria-selected="false" aria-controls="ctlObs">Observaciones</button>
   </div>
   <div class="filtros">
     <label><span>Desde</span><input type="date" id="ccDesde"></label>
@@ -777,14 +788,14 @@
       <div><span class="num" id="ckFallas">0</span><small>Fallas reportadas</small></div>
       <div><span class="num" id="ckFotos">0</span><small>Fotos tomadas</small></div>
     </div>
-    <div class="grafica"><h2>¿Quién no llenó su check list?</h2><p class="sub">Días con registro, mezcla u horómetro sin check list. El baterista cumple si su piloto lo eligió en el check list.</p>
+    <div class="grafica"><h2>¿Quién no llenó su check list?</h2><p class="sub">Días con registro, mezcla u horómetro sin check list. Cumple si llenó el check list o si el encargado lo eligió en su equipo.</p>
       <div class="tabla-envoltura"><table>
         <thead><tr><th>Fecha</th><th>Colaborador</th><th>Rol</th><th>Lo que cargó ese día</th><th>Estado</th></tr></thead>
         <tbody id="ckFaltaTabla"></tbody></table></div>
       <p class="vacio" id="ckTodoBien" hidden>Todos los que trabajaron llenaron su check list.</p></div>
-    <div class="grafica"><h2>Check list llenados</h2><p class="sub">Cada fila es un check list del piloto con su baterista</p>
+    <div class="grafica"><h2>Check list llenados</h2><p class="sub">Uno por camión al día: el encargado y su equipo</p>
       <div class="tabla-envoltura"><table>
-        <thead><tr><th>Fecha</th><th>Piloto</th><th>Baterista</th><th>Finca</th><th>Camión</th><th>Falla</th><th>Fotos</th><th>Observaciones</th></tr></thead>
+        <thead><tr><th>Fecha</th><th>Encargado</th><th>Equipo</th><th>Finca</th><th>Camión</th><th>Falla</th><th>Fotos</th><th>Observaciones</th></tr></thead>
         <tbody id="ckTabla"></tbody></table></div></div>
   </div>
   <div id="ctlGen" role="tabpanel" hidden>
@@ -829,6 +840,24 @@
       <div class="tabla-envoltura"><table>
         <thead><tr><th>Fecha</th><th>Equipo</th><th>Tipo</th><th class="n">Galones</th><th class="n">Precio/gal</th><th class="n">Total Q</th><th>Anotó</th></tr></thead>
         <tbody id="coTabla"></tbody></table></div></div>
+  </div>
+  <div id="ctlObs" role="tabpanel" hidden>
+    <div class="totales cuatro">
+      <div><span class="num" id="obN">0</span><small>Observaciones</small></div>
+      <div><span class="num" id="obFallas" style="color:var(--alerta)">0</span><small>Fallas y equipo en mal estado</small></div>
+      <div><span class="num" id="obDias">0</span><small>Días con observaciones</small></div>
+      <div><span class="num" id="obGente">0</span><small>Colaboradores</small></div>
+    </div>
+    <div class="rapidos" id="obTipos">
+      <button class="chip" type="button" data-ob="" aria-pressed="true">Todas</button>
+      <button class="chip" type="button" data-ob="Registro" aria-pressed="false">Registros</button>
+      <button class="chip" type="button" data-ob="Mezcla" aria-pressed="false">Mezclas</button>
+      <button class="chip" type="button" data-ob="Horómetro" aria-pressed="false">Horómetro</button>
+      <button class="chip" type="button" data-ob="Check list" aria-pressed="false">Check list</button>
+      <button class="chip" type="button" data-ob="Generadores" aria-pressed="false">Generadores</button>
+      <button class="chip" type="button" data-ob="Falla" aria-pressed="false">Fallas</button>
+    </div>
+    <div id="obLista"></div>
   </div>
   <p class="vacio" id="ccVacio" hidden>No hay registros en esas fechas.</p>
 </section>
@@ -1451,16 +1480,39 @@ $('dvAbrir').addEventListener('click', () => { copiarTexto($('dvUsuario').textCo
 
 /* ====== CHECK LIST ====== */
 const valoresCheck = {};
-const bateristasLista = () => ((catalogos && catalogos.integrantes) || []).filter(x => x.rol === 'BATERISTA').map(x => x.usuario).sort();
+/* Equipo del día: pilotos y bateristas que llenan juntos el check list (uno por camión). Cuenta para todos. */
+let equipoCheck = new Set(), soloCheck = false;
+function pintarEquipo() {
+  const todos = ((catalogos && catalogos.integrantes) || []).filter(x => x.usuario !== sesion.usuario && (x.rol === 'PILOTO' || x.rol === 'BATERISTA'));
+  const grupo = (rol, titulo) => {
+    const us = todos.filter(x => x.rol === rol).map(x => x.usuario).sort();
+    return us.length ? `<small>${titulo}</small><div class="chips">${us.map(u => `<button type="button" class="chip" data-eq="${esc(u)}" aria-pressed="${equipoCheck.has(u)}">${esc(u)}</button>`).join('')}</div>` : '';
+  };
+  $('cEquipo').innerHTML = grupo('PILOTO', 'Pilotos') + grupo('BATERISTA', 'Bateristas')
+    + `<div class="chips"><button type="button" class="chip" data-solo="1" aria-pressed="${soloCheck}">Trabajé solo hoy</button></div>`;
+  $('cEquipo').querySelectorAll('[data-eq]').forEach(b => b.onclick = () => {
+    const u = b.dataset.eq; equipoCheck.has(u) ? equipoCheck.delete(u) : equipoCheck.add(u);
+    if (equipoCheck.size) soloCheck = false; pintarEquipo(); $('cEquipoCampo').classList.remove('falta');
+  });
+  $('cEquipo').querySelector('[data-solo]').onclick = () => { soloCheck = !soloCheck; if (soloCheck) equipoCheck.clear(); pintarEquipo(); };
+}
+/* Si el camión ya tiene check list ese día (lo llenó otro del equipo), se avisa y no se repite. */
+function checkDelCamion() {
+  const cam = $('cCamion').value, f = leerFecha('cFecha');
+  const hecho = cam && ((catalogos && catalogos.checksRecientes) || []).find(c => c.fecha === f && c.camion.toUpperCase() === cam.toUpperCase());
+  const el = $('cCamionAviso');
+  el.hidden = !hecho;
+  if (hecho) el.textContent = `El check list del camión ${cam} de este día ya lo llenó ${hecho.usuario}${hecho.equipo && hecho.equipo.length ? ' con ' + hecho.equipo.join(', ') : ''}. Solo se llena uno por camión.`;
+  return hecho;
+}
 function prepararCheck() {
   prepararFecha('cFecha'); $('cEncargado').value = sesion.usuario;
-  const sel = $('cBaterista'), antes = sel.value || store.get('ultBaterista', '');
-  const lista = bateristasLista();
-  sel.innerHTML = '<option value="">Seleccione el baterista</option>' + lista.map(b => `<option>${esc(b)}</option>`).join('')
-    + '<option value="__ninguno">Trabajé sin baterista</option>';
-  if ([...sel.options].some(o => o.value === antes)) sel.value = antes;
+  if (!equipoCheck.size && !soloCheck) equipoCheck = new Set(store.get('ultEquipo', []).filter(u => ((catalogos && catalogos.integrantes) || []).some(x => x.usuario === u)));
+  pintarEquipo(); checkDelCamion();
   pintarSecciones();
 }
+$('cCamion').addEventListener('change', checkDelCamion);
+$('cFecha').addEventListener('change', checkDelCamion);
 $('cLabor').onchange = pintarSecciones;
 decimal($('cKm'));
 
@@ -1469,7 +1521,7 @@ function pintarSecciones() {
   $('cObsCampo').hidden = !labor;
   if (!labor) { cont.innerHTML = ''; $('cRol').textContent = 'Al elegir la labor aparece el check list completo.'; return; }
   // El piloto llena el check list completo junto a su baterista
-  $('cRol').textContent = 'Check list completo: lo llena el piloto junto a su baterista.';
+  $('cRol').textContent = 'Check list completo: lo llena el encargado junto a su equipo del día.';
   const visibles = SECCIONES;
   cont.innerHTML = visibles.map((s, si) => {
     const quien = `${si + 1} de ${visibles.length}`;
@@ -1597,8 +1649,8 @@ $('formCheck').onsubmit = async e => {
   if (!$('cFinca').value.trim()) faltan.push('finca');
   if (!$('cCamion').value) faltan.push('camión');
   if (!$('cKm').value.trim()) faltan.push('kilómetros');
-  const batSel = $('cBaterista').value;
-  if (!batSel) faltan.push('baterista');
+  if (!equipoCheck.size && !soloCheck) { faltan.push('su equipo del día'); $('cEquipoCampo').classList.add('falta'); }
+  if (checkDelCamion()) { err.textContent = $('cCamionAviso').textContent; $('cCamionAviso').scrollIntoView({ block: 'center' }); return; }
   const campos = {}; let sinMarcar = 0;
   $('cSecciones').querySelectorAll('.item').forEach(it => {
     if (it.closest('[hidden]')) return;   // generador "no se usó"
@@ -1627,15 +1679,17 @@ $('formCheck').onsubmit = async e => {
 
   const reg = { accion: 'guardarChecklist', id: nuevoId(), fecha: leerFecha('cFecha'), usuario: sesion.usuario, token: sesion.token,
     labor: $('cLabor').value, finca: $('cFinca').value.trim().toUpperCase(), camion: $('cCamion').value, km: $('cKm').value, campos, fotos,
-    baterista: batSel === '__ninguno' ? '' : batSel };
+    equipo: [...equipoCheck] };
   if ($('cObs').value.trim()) campos['Observaciones'] = $('cObs').value.trim();
-  store.set('ultBaterista', batSel);
+  store.set('ultEquipo', [...equipoCheck]);
+  // se anota localmente para avisar si alguien intenta llenar el mismo camión
+  if (catalogos) (catalogos.checksRecientes = catalogos.checksRecientes || []).push({ fecha: reg.fecha, camion: reg.camion, usuario: sesion.usuario, equipo: [...equipoCheck] });
   const checks = store.get('checks', {});
   checks[sesion.usuario] = { fecha: reg.fecha, labor: reg.labor, finca: reg.finca, camion: reg.camion };
   store.set('checks', checks);
   if (!(await encolar(reg))) return;
   fotosCheck = {};
-  $('formCheck').reset(); pintarSecciones();
+  $('formCheck').reset(); equipoCheck = new Set(); soloCheck = false; pintarSecciones();
   mostrar('menu');
   await sincronizarPendientes();
 };
@@ -2634,7 +2688,7 @@ const fijarRangoCC = filtrosFecha('cc', () => cargarControl());
 function elegirPestana(p) {
   pestana = p;
   $('ccUsuario').value = '';
-  $('tabMz').setAttribute('aria-selected', p === 'mz'); $('tabHo').setAttribute('aria-selected', p === 'ho'); $('tabCk').setAttribute('aria-selected', p === 'ck'); $('tabGe').setAttribute('aria-selected', p === 'ge'); $('tabCo').setAttribute('aria-selected', p === 'co');
+  $('tabMz').setAttribute('aria-selected', p === 'mz'); $('tabHo').setAttribute('aria-selected', p === 'ho'); $('tabCk').setAttribute('aria-selected', p === 'ck'); $('tabGe').setAttribute('aria-selected', p === 'ge'); $('tabCo').setAttribute('aria-selected', p === 'co'); $('tabOb').setAttribute('aria-selected', p === 'ob');
   pintarControl();
 }
 $('tabMz').onclick = () => elegirPestana('mz');
@@ -2642,6 +2696,11 @@ $('tabHo').onclick = () => elegirPestana('ho');
 $('tabCk').onclick = () => elegirPestana('ck');
 $('tabGe').onclick = () => elegirPestana('ge');
 $('tabCo').onclick = () => elegirPestana('co');
+$('tabOb').onclick = () => elegirPestana('ob');
+let filtroObs = '';
+$('obTipos').querySelectorAll('[data-ob]').forEach(b => b.onclick = () => {
+  filtroObs = b.dataset.ob; $('obTipos').querySelectorAll('[data-ob]').forEach(x => x.setAttribute('aria-pressed', x === b)); pintarControl();
+});
 $('geFiltro').onchange = () => pintarControl();
 async function cargarControl() {
   if (!cargarControl.inicio) { fijarRangoCC('mes'); cargarControl.inicio = true; }
@@ -2652,6 +2711,7 @@ async function cargarControl() {
     const dentro = f => (!desde || f.fecha >= desde) && (!hasta || f.fecha <= hasta);
     datosControl = { mezclas: datos.mezclas.filter(dentro), horometros: datos.horometros.filter(dentro),
       checklists: (datos.checklists || []).filter(dentro), trabajo: (datos.trabajo || []).filter(dentro), roles: datos.roles || [],
+      observaciones: (datos.observaciones || []).filter(dentro),
       genTodos: datos.genTodos || null, intervaloGen: datos.intervaloGen, desde, hasta };
     avisoGuardado($('ccGuardado'), guardado);
   } catch (err) {
@@ -2665,7 +2725,8 @@ function llenarColaboradoresCC() {
   const d = datosControl;
   const nombres = pestana === 'mz' ? d.mezclas.map(r => r.usuario) : pestana === 'ho' ? d.horometros.map(r => r.usuario)
     : pestana === 'ge' || pestana === 'co' ? d.checklists.map(r => r.usuario)
-    : d.checklists.map(r => r.usuario).concat(d.checklists.map(r => r.baterista), d.trabajo.map(r => r.usuario));
+    : pestana === 'ob' ? (d.observaciones || []).map(r => r.usuario)
+    : d.checklists.map(r => r.usuario).concat(...d.checklists.map(r => r.equipo || []), d.trabajo.map(r => r.usuario));
   const sel = $('ccUsuario'), actual = sel.value;
   const us = [...new Set(nombres.filter(Boolean))].sort();
   if (actual && !us.includes(actual)) us.unshift(actual);   // se conserva aunque no tenga datos en este rango
@@ -2738,6 +2799,22 @@ function pintarGeneradores(quien) {
   return true;
 }
 
+/* ====== Observaciones diarias del equipo TACA ====== */
+function pintarObservaciones(quien) {
+  const todas = (datosControl.observaciones || []).filter(o => !quien || o.usuario === quien);
+  const lista = todas.filter(o => !filtroObs || o.origen === filtroObs);
+  $('obN').textContent = todas.length;
+  $('obFallas').textContent = todas.filter(o => o.tipo === 'falla' || o.tipo === 'mal').length;
+  $('obDias').textContent = new Set(todas.map(o => o.fecha)).size;
+  $('obGente').textContent = new Set(todas.map(o => o.usuario)).size;
+  const dias = {};
+  lista.forEach(o => (dias[o.fecha] = dias[o.fecha] || []).push(o));
+  $('obLista').innerHTML = Object.keys(dias).sort().reverse().map(f => `<section class="obs-dia"><h3>${diaTexto(f) === fechaLarga(f) ? fechaLarga(f) : diaTexto(f) + ' · ' + fechaLarga(f)}</h3>${
+    dias[f].map(o => `<div class="obs-item ${esc(o.tipo)}"><span class="origen">${esc(o.origen)}</span>
+      <span class="quien"><b>${esc(o.usuario)}</b>${o.lugar ? ' · ' + esc(o.lugar) : ''}</span><p>${esc(o.texto)}</p></div>`).join('')}</section>`).join('')
+    || '<p class="vacio">No hay observaciones de este tipo en esas fechas.</p>';
+}
+
 /* ====== Combustibles: galones y quetzales por camión y por generador ====== */
 function cargasCombustible(quien) {
   const out = [];
@@ -2780,8 +2857,9 @@ function pintarCombustibles(quien) {
 /* Check list en el Centro de control: quién lo llenó y quién trabajó sin llenarlo. */
 function pintarCheckControl(quien) {
   const d = datosControl, rolDe = u => (d.roles.find(r => r.usuario === u) || {}).rol || '';
-  const cks = d.checklists.filter(c => !quien || c.usuario === quien || c.baterista === quien);
-  const cumple = (fecha, u) => d.checklists.some(c => c.fecha === fecha && (c.usuario === u || c.baterista === u));
+  const enEquipo = (c, u) => c.usuario === u || (c.equipo || []).includes(u);
+  const cks = d.checklists.filter(c => !quien || enEquipo(c, quien));
+  const cumple = (fecha, u) => d.checklists.some(c => c.fecha === fecha && enEquipo(c, u));
   const faltan = d.trabajo.filter(t => (!quien || t.usuario === quien) && !cumple(t.fecha, t.usuario))
     .sort((a, b) => b.fecha.localeCompare(a.fecha) || a.usuario.localeCompare(b.usuario));
   $('ckN').textContent = cks.length; $('ckFaltan').textContent = faltan.length;
@@ -2793,10 +2871,10 @@ function pintarCheckControl(quien) {
     const rol = rolDe(t.usuario);
     return `<tr><td>${fechaLarga(t.fecha)}</td><td>${esc(t.usuario)}</td><td>${rol === 'PILOTO' ? 'Piloto' : rol === 'BATERISTA' ? 'Baterista' : esc(rol)}</td>
       <td class="envolver">${esc(t.que.join(', '))}${t.fincas.length ? `<br><small>${esc(t.fincas.join(', '))}</small>` : ''}</td>
-      <td><span class="tag no">${rol === 'BATERISTA' ? 'Ningún piloto lo eligió' : 'No llenó check list'}</span></td></tr>`;
+      <td><span class="tag no">No está en ningún check list</span></td></tr>`;
   }).join('');
   $('ckTabla').innerHTML = cks.slice().sort((a, b) => b.fecha.localeCompare(a.fecha) || b.fila - a.fila).map(c => `<tr>
-    <td>${fechaLarga(c.fecha)}</td><td>${esc(c.usuario)}</td><td>${c.baterista ? esc(c.baterista) : '<span class="tag gris">Sin baterista</span>'}</td>
+    <td>${fechaLarga(c.fecha)}</td><td>${esc(c.usuario)}</td><td class="envolver">${(c.equipo || []).length ? esc(c.equipo.join(', ')) : '<span class="tag gris">Solo</span>'}</td>
     <td class="envolver">${esc(c.finca)}</td><td>${esc(c.camion || '—')}</td>
     <td class="envolver">${c.falla ? `<span class="tag no">Falla</span> ${esc(c.falla)}` : '—'}</td>
     <td class="envolver">${(c.fotos || []).map(f => `<a href="${esc(f.url)}" target="_blank" rel="noopener">${esc(nombreSeccionFoto(f.seccion))}</a>`).join('<br>') || '—'}</td>
@@ -2806,7 +2884,13 @@ function pintarControl() {
   llenarColaboradoresCC();
   const quien = $('ccUsuario').value, deQuien = r => !quien || r.usuario === quien;
   const mz = datosControl.mezclas.filter(deQuien), hs = datosControl.horometros.filter(deQuien);
-  $('ctlMezclas').hidden = pestana !== 'mz'; $('ctlHoro').hidden = pestana !== 'ho'; $('ctlCheck').hidden = pestana !== 'ck'; $('ctlGen').hidden = pestana !== 'ge'; $('ctlComb').hidden = pestana !== 'co';
+  $('ctlMezclas').hidden = pestana !== 'mz'; $('ctlHoro').hidden = pestana !== 'ho'; $('ctlCheck').hidden = pestana !== 'ck'; $('ctlGen').hidden = pestana !== 'ge'; $('ctlComb').hidden = pestana !== 'co'; $('ctlObs').hidden = pestana !== 'ob';
+  if (pestana === 'ob') {
+    const hay = (datosControl.observaciones || []).length > 0;
+    $('ccVacio').hidden = hay; $('ctlObs').hidden = !hay;
+    if (hay) pintarObservaciones(quien);
+    return;
+  }
   if (pestana === 'co') {
     const hay = pintarCombustibles(quien);
     $('ccVacio').hidden = hay; $('ctlComb').hidden = !hay;

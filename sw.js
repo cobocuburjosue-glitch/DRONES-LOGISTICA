@@ -2,7 +2,7 @@
    1. Guarda la app para abrirla sin señal (siempre intenta traer la versión más nueva primero).
    2. Guarda la librería de gráficas y las fuentes para ver gráficas sin señal.
    3. Envía los registros pendientes en segundo plano cuando vuelve la señal (Background Sync en Android). */
-const CACHE = 'taca-v15';
+const CACHE = 'taca-v16';
 const ARCHIVOS = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png'];
 const OPCIONALES = ['./chart.umd.js', 'https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js'];
 const API_POR_DEFECTO = 'https://script.google.com/macros/s/AKfycbwIbnegW9MqqQ8S0y_06nCOdHvtf2rHyTRaovvJxlw58KXLXdji0sP3infV3nddNXbP/exec';
