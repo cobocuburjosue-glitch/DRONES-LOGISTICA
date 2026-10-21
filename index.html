@@ -66,6 +66,10 @@
   /* Barra de estado: señal y modo día/noche */
   .estado-app { position: sticky; top: 0; z-index: 30; display: flex; align-items: center; justify-content: space-between; gap: 10px;
     height: 36px; padding: 0 12px 0 14px; background: var(--papel); border-bottom: 1px solid var(--linea); font-size: .85rem; }
+  .banner-offline { display: flex; gap: 10px; align-items: flex-start; background: var(--ambar-fondo); color: var(--tinta); border-bottom: 1px solid var(--ambar-borde); padding: 10px 16px; font-size: .9rem; line-height: 1.4; }
+  .banner-offline[hidden] { display: none; }
+  .banner-offline svg { flex: none; color: var(--ambar); margin-top: 1px; }
+  .banner-offline b { display: block; }
   .senal { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; color: var(--gris); min-width: 0; }
   .senal i { width: 9px; height: 9px; border-radius: 50%; background: var(--ok); flex: none; box-shadow: 0 0 0 3px color-mix(in srgb, var(--ok) 22%, transparent); }
   .senal.off i { background: var(--alerta); box-shadow: 0 0 0 3px color-mix(in srgb, var(--alerta) 22%, transparent); }
@@ -326,6 +330,8 @@
   .gen-conteo.verde { --gc: var(--verde); } .gen-conteo.amarillo { --gc: var(--amarillo); } .gen-conteo.rojo { --gc: var(--alerta); background: var(--rojo-fondo); }
   .gen-conteo.rojo b { color: var(--alerta); }
   .gen-conteo small { display: block; color: var(--gris); margin-top: 2px; }
+  .sub-lbl { display: block; font-weight: 500; font-size: .78rem; color: var(--gris); }
+  .reloj { display: flex; align-items: center; justify-content: center; gap: 6px; font-weight: 700; color: var(--azul-texto); font-size: .95rem; margin-top: -2px; }
   .gen-comb { border-top: 1px dashed var(--linea); margin-top: 10px; padding-top: 10px; }
   .gen-comb > b { display: block; margin-bottom: 6px; font-size: .95rem; }
   .gen-serv { margin-top: 6px; }
@@ -446,6 +452,14 @@
   .burbuja p { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
   .burbuja time { display: block; text-align: right; font-size: .72rem; color: var(--gris); margin-top: 2px; }
   .msg.mio { align-self: flex-end; flex-direction: row-reverse; }
+  .msg.admin .burbuja { background: var(--verde-fondo); border-color: var(--verde); border-width: 1.5px; }
+  .msg.admin .quien { color: var(--verde); }
+  .tag-admin { font-size: .72rem; font-weight: 700; background: var(--verde); color: #fff; border-radius: 999px; padding: 1px 7px; margin-left: 4px; vertical-align: 1px; }
+  .chat-opcion.admin-nuevo { background: var(--verde-fondo); border-color: var(--verde); border-left-color: var(--verde); box-shadow: 0 0 0 2px var(--verde) inset; }
+  .chat-opcion.admin-nuevo strong { color: var(--verde); }
+  .estado.admin { background: var(--verde) !important; color: #fff !important; }
+  .chat-flotante.admin-nuevo { background: var(--verde) !important; }
+  .aviso.admin { background: var(--verde); color: #fff; }
   .msg.mio .burbuja { background: var(--azul); border-color: var(--azul); color: #fff; border-radius: 16px 16px 4px 16px; }
   .msg.mio .burbuja time { color: #cfe7ea; }
   .msg.mio.pend .burbuja { opacity: .75; }
@@ -468,6 +482,10 @@
 <div class="estado-app" role="status" aria-live="polite">
   <span class="senal" id="senal"><i></i><span id="senalTxt">En línea</span></span>
   <button type="button" class="tema" id="btnTema" aria-label="Cambiar modo día o noche"></button>
+</div>
+<div class="banner-offline" id="bannerOffline" role="status" hidden>
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 8.8a15 15 0 0 1 4.2-2.6M9.5 5.3A15 15 0 0 1 22 8.8M5 12.5a10 10 0 0 1 3-1.9M13 10.3a10 10 0 0 1 6 2.2M8.5 16a5 5 0 0 1 7 0M12 20h.01M3 3l18 18"/></svg>
+  <div><b>Modo sin conexión</b><span></span></div>
 </div>
 
 <!-- ============ PORTADA / LOGIN ============ -->
@@ -535,7 +553,7 @@
   <button type="button" class="chat-flotante" data-ir="chat" aria-label="Abrir Chat Equipo TACA">
     <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-5A8 8 0 1 1 21 12z"/></svg>
     <span class="globo" id="chatGlobo" hidden></span></button>
-  <p class="version">Versión 17 oct 2026 (3) · horas anterior de generadores</p>
+  <p class="version">Versión 20 oct 2026 · horas DJI, dosis real y avisos</p>
   <div class="pendientes" id="avisoPendientes" hidden>
     <span id="txtPendientes"></span><button type="button" id="btnReintentar">Sincronizar ahora</button>
   </div>
@@ -621,10 +639,11 @@
       <div class="horo" id="hGrid">
         <span class="cab"></span><span class="cab">Lectura final</span><span class="cab">Del día</span>
         <span class="lbl">Número de vuelos final</span><input type="text" inputmode="numeric" id="hVf" aria-label="Número de vuelos final"><span class="dif" id="hVd">—</span>
-        <span class="lbl">Horas de vuelo final</span><input type="text" inputmode="decimal" id="hHf" aria-label="Horas de vuelo final"><span class="dif" id="hHd">—</span>
+        <span class="lbl">Horas de vuelo final<small class="sub-lbl">como sale en DJI (ej. 1.81)</small></span><input type="text" inputmode="decimal" id="hHf" aria-label="Horas de vuelo final como sale en la plataforma DJI"><span class="dif" id="hHd">—</span>
+        <span class="lbl"></span><span class="reloj" id="hReloj" hidden></span><span></span>
         <span class="lbl">Litros asperjados final</span><input type="text" inputmode="decimal" id="hLf" aria-label="Litros asperjados final"><span class="dif" id="hLd">—</span>
       </div>
-      <div class="ayuda">Anote lo que marca el drone al terminar la jornada. "Del día" se calcula solo, restando el último cierre de ese drone. Las horas pueden ir en decimal (125.5) o con dos puntos (125:30).</div>
+      <div class="ayuda">Anote lo que marca el drone al terminar la jornada. "Del día" se calcula solo, restando el último cierre de ese drone. Las horas se escriben tal como salen en la plataforma DJI: los números después del punto son minutos (1.81 = 1 h + 81 min = 2 h 21 min) y la app las pasa a horas de reloj.</div>
     </div>
     <div class="campo"><label class="campo-titulo" for="hFincaTxt">Fincas aplicadas</label>
       <div class="multi" id="hFincas">
@@ -750,7 +769,7 @@
       <div><span class="num" id="czTotal">0</span><small>Litros de mezcla</small></div>
       <div><span class="num" id="czSobra">0</span><small id="czSobraTxt">Litros sobrantes</small></div>
       <div><span class="num" id="czN">0</span><small>Mezclas</small></div>
-      <div><span class="num" id="czVar">—</span><small id="czVarTxt">Variación de ha</small></div>
+      <div><span class="num" id="czVar">—</span><small id="czVarTxt">Variación de dosis</small></div>
     </div>
     <div class="dos-col">
       <div class="grafica"><h2>Litros por tipo de mezcla</h2><p class="sub">Utilizado y sobrante de cada producto</p><div class="lienzo" id="cajaMzProd"><canvas id="chMzProd"></canvas></div></div>
@@ -759,7 +778,7 @@
     <div class="grafica"><h2>Litros de mezcla por día</h2><div class="lienzo" style="height:220px"><canvas id="chMzDia"></canvas></div></div>
     <div class="grafica"><h2>Registro de mezclas</h2><p class="sub">Todo lo que han guardado los bateristas</p>
       <div class="tabla-envoltura"><table>
-        <thead><tr><th>Fecha</th><th>Colaborador</th><th>Finca</th><th>Mezcla</th><th class="n">Total</th><th class="n">Sobrante</th><th class="n">L/ha</th><th class="n">Ha prog.</th><th class="n">Ha reales</th><th class="n">Variación</th><th>Supervisor</th><th>Foto</th><th></th></tr></thead>
+        <thead><tr><th>Fecha</th><th>Colaborador</th><th>Finca</th><th>Mezcla</th><th class="n">Total</th><th class="n">Sobrante</th><th class="n">L/ha prog.</th><th class="n">Dosis real</th><th class="n">Ha</th><th class="n">Variación dosis</th><th>Supervisor</th><th>Foto</th><th></th></tr></thead>
         <tbody id="czTabla"></tbody></table></div></div>
   </div>
 
@@ -951,14 +970,14 @@
     <div class="totales cuatro">
       <div><span class="num" id="gmN">0</span><small>Mezclas</small></div>
       <div><span class="num" id="gmL">0</span><small>Litros preparados</small></div>
-      <div><span class="num" id="gmVar">—</span><small>Variación de ha</small></div>
-      <div><span class="num" id="gmPct">—</span><small>Variación %</small></div>
+      <div><span class="num" id="gmVar">—</span><small>Litros de más / de menos</small></div>
+      <div><span class="num" id="gmPct">—</span><small>Variación de dosis</small></div>
     </div>
-    <div class="grafica" id="gmGrafica"><h2>Variación por tancada</h2><p class="sub">Ha reales contra ha programadas (litros totales ÷ L/ha). En ámbar, más de ±5 %.</p>
+    <div class="grafica" id="gmGrafica"><h2>Variación por tancada</h2><p class="sub">Dosis real (litros utilizados ÷ ha) contra la dosis programada. Negativo = sub-dosis. En ámbar, más de ±5 %.</p>
       <div class="lienzo" id="cajaGmVar"><canvas id="chGmVar"></canvas></div></div>
     <div class="grafica"><h2>Detalle por tancada</h2><p class="sub">Cada fila es una mezcla (tancada) que usted registró en Mezclas TACA</p>
       <div class="tabla-envoltura"><table>
-        <thead><tr><th>Fecha</th><th>Finca</th><th>Mezcla</th><th class="n">Total</th><th class="n">L/ha</th><th class="n">Ha prog.</th><th class="n">Ha reales</th><th class="n">Variación</th></tr></thead>
+        <thead><tr><th>Fecha</th><th>Finca</th><th>Mezcla</th><th class="n">Total</th><th class="n">L/ha prog.</th><th class="n">Ha</th><th class="n">Dosis real</th><th class="n">Variación dosis</th></tr></thead>
         <tbody id="gmTabla"></tbody></table></div></div>
   </div>
 </section>
@@ -1143,12 +1162,16 @@ function pintarBienvenida() {
   if (primera) $('bienvenida').style.backgroundImage = primera.style.backgroundImage;
   pintarAvatar();
 }
-$('btnSiguiente').onclick = () => mostrar('menu');
+$('btnSiguiente').onclick = () => { pedirPermisoAvisos(); mostrar('menu'); };
+/* Permiso para mostrar notificaciones del teléfono (mensajes del Administrador). Se pide al tocar un botón. */
+function pedirPermisoAvisos() {
+  try { if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission().catch(() => {}); } catch {}
+}
 
 let avisoT;
-function avisar(msg, error) {
-  const a = $('aviso'); a.textContent = msg; a.className = 'aviso' + (error ? ' error' : ''); a.hidden = false;
-  clearTimeout(avisoT); avisoT = setTimeout(() => a.hidden = true, 4500);
+function avisar(msg, error, clase) {
+  const a = $('aviso'); a.textContent = msg; a.className = 'aviso' + (error ? ' error' : '') + (clase ? ' ' + clase : ''); a.hidden = false;
+  clearTimeout(avisoT); avisoT = setTimeout(() => a.hidden = true, clase ? 8000 : 4500);
 }
 const sinRed = err => !!err && (err.sinRed || err.message === 'Failed to fetch' || err.name === 'TypeError' || err.name === 'AbortError');
 
@@ -1202,12 +1225,22 @@ function avisoGuardado(el, t) {
 function pintarSenal() {
   const el = $('senal'), txt = $('senalTxt'), n = red.pendientes;
   const on = enLinea();
+  const b = $('bannerOffline');
+  if (b) {
+    b.hidden = on;
+    b.querySelector('span').textContent = n ? `Puede seguir trabajando sin datos móviles. Tiene ${n} registro(s) guardado(s) en el teléfono; se subirán solos cuando vuelva la señal.`
+      : 'Puede seguir trabajando sin datos móviles. Lo que guarde queda en el teléfono y se sube solo cuando vuelva la señal.';
+  }
   el.className = 'senal' + (on ? (red.enviando ? ' envio' : '') : ' off');
   txt.textContent = !on ? (n ? `Sin conexión · ${n} guardado(s) en el teléfono` : 'Sin conexión')
     : red.enviando ? 'Enviando pendientes…' : n ? `En línea · ${n} pendiente(s)` : 'En línea';
 }
-window.addEventListener('online', () => { red.falla = false; pintarSenal(); sincronizarPendientes(true); });
-window.addEventListener('offline', pintarSenal);
+window.addEventListener('online', () => {
+  red.falla = false; pintarSenal();
+  if (red.pendientes) avisar(`Volvió la señal: subiendo ${red.pendientes} registro(s) guardado(s)…`);
+  sincronizarPendientes(true);
+});
+window.addEventListener('offline', () => { pintarSenal(); avisar('Sin señal: puede seguir trabajando. Lo que guarde se subirá cuando vuelva el internet.'); });
 
 /* ====== Modo día / noche ====== */
 const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
@@ -1240,13 +1273,28 @@ const PANTALLAS = ['portada', 'bienvenida', 'menu', 'checklist', 'registro', 'ho
 const esPiloto = () => !!sesion && !sesion.admin && rolSesion() === 'PILOTO';
 const esBaterista = () => !!sesion && !sesion.admin && rolSesion() === 'BATERISTA';
 const rolSesion = () => sesion.admin ? 'ADMIN' : (sesion.rol || (catalogos && catalogos.rol) || '');
-function mostrar(id) {
+/* Botón / gesto de "atrás" del teléfono: vuelve a la pantalla anterior en vez de salir de la app.
+   Inicio, bienvenida y portada son la raíz: desde ahí "atrás" sí sale de la app. */
+const RAIZ = ['portada', 'bienvenida', 'menu'];
+let pantallaActual = 'portada';
+window.addEventListener('popstate', e => {
+  const abierto = document.querySelector('dialog[open]');
+  if (abierto) { abierto.close(); history.pushState({ p: pantallaActual }, ''); return; }
+  const destino = e.state && e.state.p;
+  if (destino && destino !== pantallaActual) mostrar(destino, true);
+  else if (!RAIZ.includes(pantallaActual)) mostrar(sesion ? 'menu' : 'portada', true);
+});
+function mostrar(id, desdeHistorial) {
   if (['reportes', 'permisos', 'control'].includes(id) && !sesion?.admin) id = 'menu';
   if (['horometro', 'convertidor'].includes(id) && !esPiloto()) id = 'menu';
   if (id === 'mezclas' && !esBaterista() && !esPiloto()) id = 'menu';
   if (['checklist', 'vuelos'].includes(id) && !esPiloto() && !sesion?.admin) id = 'menu';
   PANTALLAS.forEach(p => $(p).hidden = p !== id);
   window.scrollTo(0, 0);
+  if (!desdeHistorial && id !== pantallaActual) {
+    try { RAIZ.includes(id) ? history.replaceState({ p: id }, '') : history.pushState({ p: id }, ''); } catch {}
+  }
+  pantallaActual = id;
   ({ bienvenida: pintarBienvenida, menu: pintarMenu, checklist: prepararCheck, registro: prepararRegistro, general: cargarGeneral,
      reportes: cargarReportes, permisos: cargarPermisos, horometro: prepararHoro, convertidor: prepararConv, mezclas: prepararMezcla,
      control: cargarControl, chat: abrirChat, vuelos: () => {} }[id] || (() => {}))();
@@ -1510,6 +1558,14 @@ function prepararCheck() {
   if (!equipoCheck.size && !soloCheck) equipoCheck = new Set(store.get('ultEquipo', []).filter(u => ((catalogos && catalogos.integrantes) || []).some(x => x.usuario === u)));
   pintarEquipo(); checkDelCamion();
   pintarSecciones();
+  // con señal, trae lo más reciente (horas de generadores y camiones ya llenados) sin borrar lo que se está escribiendo
+  if (navigator.onLine) cargarCatalogos().then(() => {
+    checkDelCamion();
+    document.querySelectorAll('#cSecciones .generador').forEach(gb => {
+      const sel = gb.querySelector('.gen-num'), ant = gb.querySelector('.gen-ant');
+      if (sel.value && sel.value !== '__no' && !ant.dataset.manual) sel.onchange();
+    });
+  }).catch(() => {});
 }
 $('cCamion').addEventListener('change', checkDelCamion);
 $('cFecha').addEventListener('change', checkDelCamion);
@@ -1542,7 +1598,7 @@ function pintarSecciones() {
             <label class="campo" style="margin:0"><span>Horas trabajadas anterior</span><input type="text" inputmode="decimal" class="dec gen-ant" data-col="Generador ${g} Horas Anterior" data-nombre="horas trabajadas anterior del generador ${g}" data-req="1" placeholder="0"></label>
             <label class="campo" style="margin:0"><span>Horas trabajadas hoy</span><input type="text" inputmode="decimal" class="dec gen-hrs" data-col="Generador ${g} Horas Trabajadas" data-nombre="horas trabajadas hoy del generador ${g}" data-req="1" placeholder="Ej. 8"></label>
           </div>
-          <div class="ayuda gen-ant-ayuda" style="margin:-2px 0 6px">Anterior = horas acumuladas desde el último servicio. La app la llena con lo que lleva; corríjala si no coincide.</div>
+          <div class="ayuda gen-ant-ayuda" style="margin:-2px 0 6px">Anterior = lo que llevaba (horas anteriores + las del último día). La app la llena sola al elegir el generador; corríjala solo si no coincide.</div>
           <div class="gen-conteo" data-falta="${g}" hidden></div>
           <div class="item gen-serv" data-col="Generador ${g} Servicio" data-req="1"><div class="nombre">¿Se le hizo servicio hoy?</div>
             <div class="tri">${['NO', 'SI'].map(v => `<button type="button" data-v="${v}" aria-pressed="false">${v === 'SI' ? 'Sí' : 'No'}</button>`).join('')}</div></div>
@@ -1691,6 +1747,19 @@ $('formCheck').onsubmit = async e => {
     equipo: [...equipoCheck] };
   if ($('cObs').value.trim()) campos['Observaciones'] = $('cObs').value.trim();
   store.set('ultEquipo', [...equipoCheck]);
+  // "horas trabajadas anterior" del próximo check list = anterior + horas de hoy (aunque no haya señal)
+  if (catalogos) {
+    catalogos.genEstado = catalogos.genEstado || {};
+    for (let g = 1; g <= 5; g++) {
+      const n = campos[`Generador ${g} Número`]; if (!n) continue;
+      const hoyH = Number(campos[`Generador ${g} Horas Trabajadas`]) || 0, ant = Number(campos[`Generador ${g} Horas Anterior`]) || 0;
+      const e = catalogos.genEstado[n] = catalogos.genEstado[n] || {};
+      e.acum = Math.round(((campos[`Generador ${g} Servicio`] === 'SI' ? 0 : ant) + hoyH) * 100) / 100;
+      if (campos[`Generador ${g} Servicio`] === 'SI') e.servicioFecha = reg.fecha;
+      e.fecha = reg.fecha;
+    }
+    store.set('catalogos', catalogos);
+  }
   // se anota localmente para avisar si alguien intenta llenar el mismo camión
   if (catalogos) (catalogos.checksRecientes = catalogos.checksRecientes || []).push({ fecha: reg.fecha, camion: reg.camion, usuario: sesion.usuario, equipo: [...equipoCheck] });
   const checks = store.get('checks', {});
@@ -1889,6 +1958,7 @@ document.addEventListener('visibilitychange', () => { if (!document.hidden && na
 setInterval(() => { if (red.pendientes && navigator.onLine && !document.hidden) sincronizarPendientes(true); }, 60000);
 if ('serviceWorker' in navigator) navigator.serviceWorker.addEventListener('message', e => {
   if (e.data && e.data.tipo === 'cola-enviada') { pintarPendientes(); refrescarListas(); }
+  if (e.data && e.data.tipo === 'abrir' && sesion) mostrar(e.data.pantalla);
 });
 /* Pasa los pendientes de la versión anterior (localStorage) al almacenamiento grande. */
 async function migrarCola() {
@@ -2019,18 +2089,18 @@ function pintarMezclasGeneral(mz) {
   $('gMezclas').hidden = !mz.length;
   if (!mz.length) return;
   const vs = mz.map(m => Object.assign({ m }, variacionMezcla(m.total, m.sobrante, m.lph, m.ha)));
-  const conVar = vs.filter(v => v.varHa != null);
-  const hp = conVar.reduce((s, v) => s + v.haProg, 0), vh = conVar.reduce((s, v) => s + v.varHa, 0), pct = hp ? vh / hp * 100 : null;
+  const conVar = vs.filter(v => v.varPct != null);
+  const hp = conVar.reduce((s, v) => s + v.litrosProg, 0), vh = conVar.reduce((s, v) => s + v.difLitros, 0), pct = hp ? vh / hp * 100 : null;
   $('gmN').textContent = mz.length;
   $('gmL').textContent = fmt2(mz.reduce((s, m) => s + m.total, 0)) + ' L';
-  $('gmVar').textContent = conVar.length ? conSigno(vh) + ' ha' : '—';
+  $('gmVar').textContent = conVar.length ? conSigno(vh) + ' L' : '—';
   $('gmPct').textContent = pct != null ? conSigno(pct) + '%' : '—';
   ['gmVar', 'gmPct'].forEach(id => $(id).style.color = pct != null && Math.abs(pct) > 5 ? 'var(--ambar)' : '');
   const orden = vs.slice().sort((a, b) => b.m.fecha.localeCompare(a.m.fecha));
   $('gmTabla').innerHTML = orden.map(v => `<tr><td>${fechaLarga(v.m.fecha)}${sesion.admin ? `<br><small>${esc(v.m.usuario)}</small>` : ''}</td><td class="envolver">${esc(v.m.finca)}</td>
     <td class="envolver">${conCortes(v.m.productos)}</td><td class="n">${fmt2(v.m.total)}</td><td class="n">${v.m.lph != null ? fmt2(v.m.lph) : '—'}</td>
-    <td class="n">${v.haProg != null ? fmt2(v.haProg) : '—'}</td><td class="n">${v.m.ha != null ? fmt2(v.m.ha) : '—'}</td>
-    <td class="n">${v.varHa != null ? `<b class="${Math.abs(v.varPct) > 5 ? 'var-alta' : 'var-pos'}">${conSigno(v.varHa)} ha</b><br><small>${conSigno(v.varPct)}%</small>` : '<small>Falta L/ha o ha</small>'}</td></tr>`).join('');
+    <td class="n">${v.m.ha != null ? fmt2(v.m.ha) : '—'}</td><td class="n">${v.lphReal != null && v.m.ha != null ? fmt2(v.lphReal) : '—'}</td>
+    <td class="n">${v.varPct != null ? `<b class="${Math.abs(v.varPct) > 5 ? 'var-alta' : 'var-pos'}">${conSigno(v.varPct)}%</b><br><small>${conSigno(v.varLph)} L/ha</small>` : '<small>Falta L/ha o ha</small>'}</td></tr>`).join('');
   $('gmGrafica').hidden = !conVar.length;
   if (!conVar.length || !window.Chart) return;
   estiloGraficas();
@@ -2043,7 +2113,7 @@ function pintarMezclasGeneral(mz) {
         borderRadius: 5, borderSkipped: false, maxBarThickness: 28 }] },
     options: { indexAxis: 'y', maintainAspectRatio: false,
       scales: { x: { min: -lim, max: lim, grid: { color: css('--rejilla') }, ticks: { maxTicksLimit: 5, callback: x => Math.round(x) + '%' } }, y: { grid: { display: false }, ticks: { color: css('--tinta'), font: { weight: 600 } } } },
-      plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => { const v = datos[c.dataIndex]; return `${conSigno(v.varHa)} ha (${conSigno(v.varPct)}%) · ${fmt2(v.haProg)} prog. / ${fmt2(v.m.ha)} reales`; } } } } } });
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => { const v = datos[c.dataIndex]; return `Dosis ${fmt2(v.lphReal)} L/ha (${conSigno(v.varPct)}%) · programado ${fmt2(v.m.lph)} L/ha`; } } } } } });
 }
 
 /* ---------- Detalle editable ---------- */
@@ -2353,6 +2423,25 @@ function soloNumeros(inp, permitir) {
 }
 const fmt2 = v => v == null ? '—' : (Math.round(v * 100) / 100).toLocaleString('es-GT', { maximumFractionDigits: 2 });
 
+/* Horas como salen en la plataforma DJI: los números después del punto son MINUTOS.
+   1.81 = 1 h + 81 min = 2 h 21 min = 2.35 h.  También acepta 2:21. Devuelve horas en decimal. */
+function leerHorasDJI(v) {
+  const t = String(v || '').trim().replace(',', '.'); if (!t) return null;
+  let m = t.match(/^(\d+):(\d{1,2})$/);
+  if (m) return Number(m[1]) + Number(m[2]) / 60;
+  m = t.match(/^(\d*)(?:\.(\d*))?$/);
+  if (!m || (m[1] === '' && !m[2])) return null;
+  const minutos = m[2] ? Number((m[2] + '0').slice(0, 2)) : 0;   // "1.5" = 1 h 50 min, como se lee en DJI
+  return Number(m[1] || 0) + minutos / 60;
+}
+/* 2.35 → "2 h 21 min" */
+function horaReloj(h) {
+  if (h == null || isNaN(h)) return '—';
+  const neg = h < 0, tot = Math.round(Math.abs(h) * 60), hh = Math.floor(tot / 60), mm = tot % 60;
+  return (neg ? '−' : '') + (hh ? `${hh} h ` : '') + `${mm} min`;
+}
+const aHM = h => { const tot = Math.round(h * 60); return Math.floor(tot / 60) + ':' + String(tot % 60).padStart(2, '0'); };
+
 /* ====== HORÓMETRO PILOTO ======
    El piloto anota solo las lecturas FINALES. Lo del día = final − último cierre de ese drone. */
 const H_CAMPOS = ['hVf', 'hHf', 'hLf', 'hObs'];
@@ -2374,17 +2463,20 @@ function prepararHoro() {
 }
 function pintarUltimo() {
   const d = $('hDrone').value, u = ultimoCierre(d);
-  $('hUltimo').textContent = !d ? '' : u ? `Último cierre de ${d}: ${fechaLarga(u.fecha)} (${u.piloto}) — ${fmt2(u.vuelos)} vuelos, ${fmt2(u.horas)} h, ${fmt2(u.litros)} L.`
+  $('hUltimo').textContent = !d ? '' : u ? `Último cierre de ${d}: ${fechaLarga(u.fecha)} (${u.piloto}) — ${fmt2(u.vuelos)} vuelos, ${horaReloj(u.horas)}, ${fmt2(u.litros)} L.`
     : `Primera lectura de ${d}: se refleja completa (inicio en 0).`;
 }
 $('hDrone').onchange = () => { pintarUltimo(); calcularHoro(); guardarBorradorHoro(); };
 function calcularHoro() {
   const u = ultimoCierre($('hDrone').value);
-  [['vuelos', 'hVf', 'hVd', n2], ['horas', 'hHf', 'hHd', leerHoras], ['litros', 'hLf', 'hLd', n2]].forEach(([k, z, d, leer]) => {
+  [['vuelos', 'hVf', 'hVd', n2], ['horas', 'hHf', 'hHd', leerHorasDJI], ['litros', 'hLf', 'hLd', n2]].forEach(([k, z, d, leer]) => {
     const f = leer($(z).value), el = $(d), i = u ? Number(u[k]) : 0;   // primera lectura: inicio 0
     if (f == null) { el.textContent = '—'; el.classList.remove('mal'); return; }
-    el.textContent = fmt2(f - i); el.classList.toggle('mal', f < i);
+    el.textContent = k === 'horas' ? horaReloj(f - i) : fmt2(f - i); el.classList.toggle('mal', f < i);
   });
+  const hf = leerHorasDJI($('hHf').value), rl = $('hReloj');
+  rl.hidden = hf == null;
+  if (hf != null) rl.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> ${horaReloj(hf)} de vuelo`;
 }
 /* El borrador se guarda en el teléfono con cada cambio: si se cierra la app, no se pierde. */
 function guardarBorradorHoro() {
@@ -2407,7 +2499,7 @@ autocompletar($('hFincaTxt'), {
 $('formHoro').onsubmit = async e => {
   e.preventDefault();
   const err = $('horoError'); err.textContent = '';
-  const v = { vf: n2($('hVf').value), hf: leerHoras($('hHf').value), lf: n2($('hLf').value) };
+  const v = { vf: n2($('hVf').value), hf: leerHorasDJI($('hHf').value), lf: n2($('hLf').value) };
   const faltan = [];
   if (!$('hDrone').value) faltan.push('drone');
   if (v.vf == null) faltan.push('número de vuelos final');
@@ -2418,10 +2510,10 @@ $('formHoro').onsubmit = async e => {
   if (faltan.length) { err.textContent = 'Complete: ' + faltan.join(', ') + '.'; return; }
   const drone = $('hDrone').value, u = ultimoCierre(drone);
   if (u && (v.vf < u.vuelos || v.hf < u.horas || v.lf < u.litros) &&
-      !confirm(`Alguna lectura es menor que el último cierre de ${drone} (${fmt2(u.vuelos)} vuelos, ${fmt2(u.horas)} h, ${fmt2(u.litros)} L). ¿Guardar de todos modos? (por ejemplo, si el contador del drone se reinició)`)) return;
+      !confirm(`Alguna lectura es menor que el último cierre de ${drone} (${fmt2(u.vuelos)} vuelos, ${horaReloj(u.horas)}, ${fmt2(u.litros)} L). ¿Guardar de todos modos? (por ejemplo, si el contador del drone se reinició)`)) return;
   const fechaHoro = leerFecha('hFecha');
   const ok = await encolar({ accion: 'guardarHorometro', id: nuevoId(), fecha: fechaHoro, usuario: sesion.usuario, token: sesion.token,
-    drone, vf: v.vf, hf: $('hHf').value.trim(), lf: v.lf, fincas: fincasHoro.slice(), observaciones: $('hObs').value.trim() });
+    drone, vf: v.vf, hf: aHM(v.hf), horasDJI: $('hHf').value.trim(), lf: v.lf, fincas: fincasHoro.slice(), observaciones: $('hObs').value.trim() });
   if (!ok) return;
   // este cierre será la base del próximo, aunque no haya señal
   catalogos.horometros = catalogos.horometros || {};
@@ -2504,29 +2596,40 @@ function calcularMezcla() {
   $('mUtilizado').style.color = t != null && s2 > t ? 'var(--alerta)' : '';
   pintarVariacion($('mVariacion'), variacionMezcla(t, s2, n2($('mLph').value), n2($('mHa').value)), t, s2, n2($('mHa').value));
 }
-/* Variación entre lo programado y lo real:
-   ha programadas = litros totales ÷ litros por ha   (400 ÷ 14 = 28.57 ha)
-   variación      = ha reales − ha programadas       (28.60 − 28.57 = +0.03 ha · +0.10 %)
-   L/ha real      = litros utilizados ÷ ha reales     (388 ÷ 28.60 = 13.57 L/ha) */
+/* Variación de la DOSIS según el sobrante:
+   litros utilizados = totales − sobrante                      (600 − 10 = 590 L)
+   dosis real        = litros utilizados ÷ ha aplicadas         (590 ÷ 42.85 = 13.77 L/ha)
+   variación         = dosis real − dosis programada            (13.77 − 14 = −0.23 L/ha · −1.66 %)
+   ha que debía cubrir con lo utilizado = utilizados ÷ L/ha    (590 ÷ 14 = 42.14 ha)
+   litros que debía usar = L/ha × ha aplicadas                 (14 × 42.85 = 599.9 L → sobrante esperado 0.1 L) */
 function variacionMezcla(total, sobrante, lph, ha) {
-  const haProg = total > 0 && lph > 0 ? total / lph : null;
-  const varHa = haProg != null && ha > 0 ? ha - haProg : null;
-  return { haProg, varHa, varPct: varHa != null ? varHa / haProg * 100 : null, lphReal: total > 0 && ha > 0 ? (total - (sobrante || 0)) / ha : null };
+  const util = total > 0 ? total - (sobrante || 0) : null;
+  const haProg = util != null && lph > 0 ? util / lph : null;
+  const conHa = util != null && lph > 0 && ha > 0;
+  const lphReal = util != null && ha > 0 ? util / ha : null;
+  const litrosProg = conHa ? lph * ha : null;
+  return { util, haProg, lphReal, litrosProg,
+    varLph: conHa ? lphReal - lph : null, varPct: conHa ? (lphReal - lph) / lph * 100 : null,
+    varHa: conHa ? ha - haProg : null, difLitros: conHa ? util - litrosProg : null,
+    sobranteEsperado: conHa ? total - litrosProg : null };
 }
 const conSigno = (n, dec = 2) => (n > 0 ? '+' : n < 0 ? '−' : '') + Math.abs(n).toFixed(dec);
 function pintarVariacion(caja, v, total, sobrante, haReal) {
   if (v.haProg == null) { caja.hidden = true; return; }
-  const lph = total / v.haProg;
-  let html = `<h3>Variación de la aplicación</h3>
-    <div class="fila-v"><span>Ha programadas <small style="display:inline">(${fmt2(total)} L ÷ ${fmt2(lph)} L/ha)</small></span><b>${fmt2(v.haProg)} ha</b></div>`;
-  if (v.varHa != null) {
-    html += `<div class="fila-v"><span>Ha reales</span><b>${(haReal != null ? haReal : v.haProg + v.varHa).toFixed(2)} ha</b></div>
-      <div class="fila-v grande"><span>Variación</span><b>${conSigno(v.varHa)} ha · ${conSigno(v.varPct)}%</b></div>
-      <div class="fila-v"><span>Litros por ha real <small style="display:inline">(${fmt2(total - (sobrante || 0))} L utilizados)</small></span><b>${fmt2(v.lphReal)} L/ha</b></div>
-      <small>${Math.abs(v.varHa) < 0.005 ? 'Se aplicó exactamente lo programado.'
-        : v.varHa > 0 ? `Se cubrieron ${fmt2(v.varHa)} ha más de lo programado.` : `Se cubrieron ${fmt2(-v.varHa)} ha menos de lo programado.`}
+  const lph = v.util / v.haProg;
+  let html = `<h3>Variación de la dosis</h3>
+    <div class="fila-v"><span>Litros utilizados <small style="display:inline">(${fmt2(total)} − ${fmt2(sobrante || 0)} sobrante)</small></span><b>${fmt2(v.util)} L</b></div>
+    <div class="fila-v"><span>Ha que debía cubrir <small style="display:inline">(${fmt2(v.util)} L ÷ ${fmt2(lph)} L/ha)</small></span><b>${fmt2(v.haProg)} ha</b></div>`;
+  if (v.varPct != null) {
+    html += `<div class="fila-v"><span>Ha aplicadas</span><b>${haReal.toFixed(2)} ha</b></div>
+      <div class="fila-v"><span>Dosis real <small style="display:inline">(${fmt2(v.util)} L ÷ ${fmt2(haReal)} ha)</small></span><b>${fmt2(v.lphReal)} L/ha</b></div>
+      <div class="fila-v grande"><span>Variación de dosis</span><b>${conSigno(v.varLph)} L/ha · ${conSigno(v.varPct)}%</b></div>
+      <div class="fila-v"><span>Sobrante esperado <small style="display:inline">(${fmt2(total)} − ${fmt2(lph)} × ${fmt2(haReal)})</small></span><b>${fmt2(v.sobranteEsperado)} L <small style="display:inline">· real ${fmt2(sobrante || 0)} L</small></b></div>
+      <small>${Math.abs(v.varPct) < 0.05 ? 'La dosis quedó igual a la programada.'
+        : v.varPct < 0 ? `Quedó en sub-dosis: se aplicaron ${fmt2(-v.varLph)} L/ha menos de lo programado (${fmt2(-v.difLitros)} L menos en total).`
+        : `Quedó en sobre-dosis: se aplicaron ${fmt2(v.varLph)} L/ha más de lo programado (${fmt2(v.difLitros)} L más en total).`}
         ${Math.abs(v.varPct) > 5 ? ' La variación es mayor al 5 %, revise la calibración.' : ''}</small>`;
-  } else html += '<small>Escriba la cantidad de ha reales para ver la variación.</small>';
+  } else html += '<small>Escriba la cantidad de ha aplicadas para ver cómo quedó la dosis.</small>';
   caja.innerHTML = html;
   caja.classList.toggle('alta', v.varPct != null && Math.abs(v.varPct) > 5);
   caja.hidden = false;
@@ -2588,12 +2691,12 @@ async function cargarMisRegistros(tipo) {
   const tarjeta = (r, pendiente) => tipo === 'mezcla'
     ? `<div class="tarjeta-reg"><div class="info"><b>${esc(r.finca)} · ${conCortes(r.productos)}</b>
         <small>${fechaLarga(r.fecha)}${r.hora ? ' ' + esc(r.hora) : ''} · ${esc(r.supervisor || '')}</small>
-        <small>Sobrante: ${fmt2(Number(r.sobrante))} L${(v => v.varHa != null ? ` · Variación: <b class="${Math.abs(v.varPct) > 5 ? 'var-alta' : 'var-pos'}">${conSigno(v.varHa)} ha (${conSigno(v.varPct)}%)</b>` : '')(variacionMezcla(Number(r.total), Number(r.sobrante), n2(String(r.lph ?? '')), n2(String(r.ha ?? ''))))}${pendiente ? ' · <span class="tag gris">Sin enviar</span>' : ''}${r.error ? ` · <span class="tag no">${esc(r.error)}</span>` : ''}</small></div>
+        <small>Sobrante: ${fmt2(Number(r.sobrante))} L${(v => v.varPct != null ? ` · Dosis: <b class="${Math.abs(v.varPct) > 5 ? 'var-alta' : 'var-pos'}">${fmt2(v.lphReal)} L/ha (${conSigno(v.varPct)}%)</b>` : '')(variacionMezcla(Number(r.total), Number(r.sobrante), n2(String(r.lph ?? '')), n2(String(r.ha ?? ''))))}${pendiente ? ' · <span class="tag gris">Sin enviar</span>' : ''}${r.error ? ` · <span class="tag no">${esc(r.error)}</span>` : ''}</small></div>
         <span class="cifra">${fmt2(Number(r.total))} L</span>
         ${!pendiente && puede ? `<button type="button" class="btn-editar" data-editar="${r.fila}">Editar</button>` : ''}</div>`
     : `<div class="tarjeta-reg"><div class="info"><b>${esc(r.drone)} · ${pendiente ? 'final ' + fmt2(r.vf) : fmt2(r.vuelos)} vuelos</b>
-        <small>${fechaLarga(r.fecha)} · ${pendiente ? `lectura final ${esc(r.hf)} h · ${fmt2(r.lf)} L`
-          : `${fmt2(r.horas)} h · ${fmt2(r.litros)} L en el día`}</small>
+        <small>${fechaLarga(r.fecha)} · ${pendiente ? `lectura final ${horaReloj(leerHoras(r.hf))} · ${fmt2(r.lf)} L`
+          : `${horaReloj(r.horas)} · ${fmt2(r.litros)} L en el día`}</small>
         <small>${esc(Array.isArray(r.fincas) ? r.fincas.join(', ') : r.fincas)}${pendiente ? ' · <span class="tag gris">Sin enviar</span>' : ''}${r.error ? ` · <span class="tag no">${esc(r.error)}</span>` : ''}</small></div>
         ${!pendiente && puede ? `<button type="button" class="btn-editar" data-editar="${r.fila}">Editar</button>` : ''}</div>`;
   cont.innerHTML = (guardado ? `<div class="datos-guardados">Sin conexión: lista guardada el ${horaCorta(guardado)}.</div>` : '')
@@ -2929,11 +3032,11 @@ function pintarControl() {
     const tot = mz.reduce((s, m) => s + m.total, 0), sob = mz.reduce((s, m) => s + m.sobrante, 0);
     $('czTotal').textContent = fmt2(tot) + ' L'; $('czSobra').textContent = fmt2(sob) + ' L';
     $('czSobraTxt').textContent = `Litros sobrantes (${tot ? fmt2(sob / tot * 100) : 0}%)`; $('czN').textContent = mz.length;
-    const conVar = mz.map(m => variacionMezcla(m.total, m.sobrante, m.lph, m.ha)).filter(v => v.varHa != null);
-    const hp = conVar.reduce((s, v) => s + v.haProg, 0), vh = conVar.reduce((s, v) => s + v.varHa, 0);
-    $('czVar').textContent = conVar.length ? conSigno(vh) + ' ha' : '—';
+    const conVar = mz.map(m => variacionMezcla(m.total, m.sobrante, m.lph, m.ha)).filter(v => v.varPct != null);
+    const hp = conVar.reduce((s, v) => s + v.litrosProg, 0), vh = conVar.reduce((s, v) => s + v.difLitros, 0);
+    $('czVar').textContent = conVar.length ? conSigno(hp ? vh / hp * 100 : 0) + '%' : '—';
     $('czVar').style.color = conVar.length && hp && Math.abs(vh / hp * 100) > 5 ? 'var(--ambar)' : '';
-    $('czVarTxt').textContent = conVar.length ? `Variación de ha (${conSigno(hp ? vh / hp * 100 : 0)}% en ${conVar.length} mezcla${conVar.length > 1 ? 's' : ''})` : 'Variación de ha (sin L/ha y ha)';
+    $('czVarTxt').textContent = conVar.length ? `Variación de dosis (${conSigno(vh)} L en ${conVar.length} mezcla${conVar.length > 1 ? 's' : ''})` : 'Variación de dosis (sin L/ha y ha)';
     const prods = suma(mz, 'productos', 'total');
     const usado = Object.fromEntries(suma(mz, 'productos', 'utilizado')), sobra = Object.fromEntries(suma(mz, 'productos', 'sobrante'));
     barrasApiladas('chMzProd', 'cajaMzProd', prods.map(p => p[0]),
@@ -2946,8 +3049,8 @@ function pintarControl() {
     $('czTabla').innerHTML = mz.slice().sort((a, b) => b.fecha.localeCompare(a.fecha) || b.fila - a.fila).map(m => `<tr>
       <td>${fechaLarga(m.fecha)}${m.hora ? `<br><small>${esc(m.hora)}</small>` : ''}</td><td>${esc(m.usuario)}</td><td class="envolver">${esc(m.finca)}</td><td class="envolver">${conCortes(m.productos)}</td>
       <td class="n">${fmt2(m.total)}</td><td class="n">${fmt2(m.sobrante)}</td>
-      <td class="n">${m.lph != null ? fmt2(m.lph) : '—'}</td><td class="n">${m.haProg != null ? fmt2(m.haProg) : '—'}</td><td class="n">${m.ha != null ? fmt2(m.ha) : '—'}</td>
-      <td class="n">${m.varHa != null ? `<b class="${Math.abs(m.varPct) > 5 ? 'var-alta' : 'var-pos'}">${conSigno(m.varHa)} ha</b><br><small>${conSigno(m.varPct)}%</small>` : '—'}</td>
+      <td class="n">${m.lph != null ? fmt2(m.lph) : '—'}</td><td class="n">${m.lphReal != null && m.ha != null ? fmt2(m.lphReal) : '—'}</td><td class="n">${m.ha != null ? fmt2(m.ha) : '—'}</td>
+      <td class="n">${m.varPct != null ? `<b class="${Math.abs(m.varPct) > 5 ? 'var-alta' : 'var-pos'}">${conSigno(m.varPct)}%</b><br><small>${conSigno(m.varLph)} L/ha</small>` : '—'}</td>
       <td>${esc(m.supervisor)}</td>
       <td>${m.foto ? `<a href="${esc(m.foto)}" target="_blank" rel="noopener">Ver</a>` : '—'}</td>
       <td><button type="button" class="btn-editar" data-mz="${m.fila}">Editar</button></td></tr>`).join('');
@@ -3004,18 +3107,46 @@ async function chatTraer() {
   } catch { return 0; }
   finally { chatTrayendo = false; }
 }
+const esAdminChat = u => String(u || '').trim().toUpperCase() === 'ADMINISTRADOR'
+  || (chat.integrantes || []).some(g => g.usuario === u && g.rol === 'ADMIN');
+/* Mensajes nuevos del Administrador: el cuadro del chat se pone verde y llega una notificación. */
+function avisarMensajesAdmin() {
+  if (!sesion || sesion.admin) return;
+  const visto = store.get('chatAvisoAdminTs', 0);
+  const nuevos = chat.msgs.filter(m => m.ts > visto && esAdminChat(m.usuario));
+  if (!nuevos.length) return;
+  store.set('chatAvisoAdminTs', Math.max(...nuevos.map(m => m.ts)));
+  if (!$('chat').hidden) return;   // ya lo está viendo
+  const m = nuevos[nuevos.length - 1], texto = m.mensaje.length > 120 ? m.mensaje.slice(0, 117) + '…' : m.mensaje;
+  avisar(`Mensaje del Administrador: ${texto}`, false, 'admin');
+  try {
+    if ('Notification' in window && Notification.permission === 'granted' && navigator.serviceWorker) {
+      navigator.serviceWorker.ready.then(r => r.showNotification('Mensaje del Administrador', {
+        body: texto, tag: 'taca-admin', renotify: true, icon: 'icon-192.png', badge: 'icon-192.png', data: { pantalla: 'chat' } })).catch(() => {});
+    }
+  } catch {}
+}
+function noLeidosAdmin() {
+  const leido = store.get('chatLeidoTs', 0);
+  return chat.msgs.filter(m => m.ts > leido && esAdminChat(m.usuario) && m.usuario !== sesion.usuario).length;
+}
 function noLeidos() {
   const leido = store.get('chatLeidoTs', 0);
   return chat.msgs.filter(m => m.ts > leido && m.usuario !== sesion.usuario).length;
 }
 function pintarNoLeidos() {
   cargarChatLocal().then(() => {
-    const n = noLeidos(), e = $('estadoChat');
-    e.hidden = !n; e.textContent = n === 1 ? '1 mensaje nuevo' : `${n} mensajes nuevos`;
+    const n = noLeidos(), na = noLeidosAdmin(), e = $('estadoChat');
+    e.hidden = !n; e.textContent = na ? (na === 1 ? 'Mensaje del Administrador' : `${na} mensajes del Administrador`) : n === 1 ? '1 mensaje nuevo' : `${n} mensajes nuevos`;
+    e.classList.toggle('admin', !!na);
+    document.querySelector('.chat-opcion').classList.toggle('admin-nuevo', !!na);
+    document.querySelector('.chat-flotante').classList.toggle('admin-nuevo', !!na);
     $('chatGlobo').hidden = !n; $('chatGlobo').textContent = n > 99 ? '99+' : n;
+    avisarMensajesAdmin();
   });
 }
 async function abrirChat() {
+  pedirPermisoAvisos();
   await cargarChatLocal();
   pintarChat(true);
   $('chatTxt').focus({ preventScroll: true });
@@ -3040,15 +3171,15 @@ async function pintarChat(alFinal) {
   let html = '', dia = '', anterior = null;
   todos.forEach(m => {
     if (m.fecha !== dia) { dia = m.fecha; html += `<div class="chat-dia">${esc(diaTexto(m.fecha))}</div>`; anterior = null; }
-    const mio = m.usuario === sesion.usuario, seguido = anterior === m.usuario;
+    const mio = m.usuario === sesion.usuario, seguido = anterior === m.usuario, adm = !mio && esAdminChat(m.usuario);
     const estado = m.pendiente ? (m.error ? ` · <span title="${esc(m.error)}">no se pudo enviar</span>` : (enLinea() ? ' · enviando…' : ' · sin señal, se enviará')) : '';
-    html += `<div class="msg${mio ? ' mio' : ''}${seguido ? ' seguido' : ''}${m.pendiente ? ' pend' : ''}">${mio ? '' : avatarDe(m.usuario)}
-      <div class="burbuja">${mio ? '' : `<span class="quien">${esc(m.usuario)}</span>`}
+    html += `<div class="msg${mio ? ' mio' : ''}${adm ? ' admin' : ''}${seguido ? ' seguido' : ''}${m.pendiente ? ' pend' : ''}">${mio ? '' : avatarDe(m.usuario)}
+      <div class="burbuja">${mio ? '' : `<span class="quien">${esc(m.usuario)}${adm && String(m.usuario).trim().toUpperCase() !== 'ADMINISTRADOR' ? ' <span class="tag-admin">Administrador</span>' : ''}</span>`}
       <p>${esc(m.mensaje)}</p><time>${esc(m.hora || '')}${estado}</time></div></div>`;
     anterior = m.usuario;
   });
   lista.innerHTML = html;
-  if (!$('chat').hidden) store.set('chatLeidoTs', ultimoTs());
+  if (!$('chat').hidden) { store.set('chatLeidoTs', ultimoTs()); store.set('chatAvisoAdminTs', Math.max(store.get('chatAvisoAdminTs', 0), ultimoTs())); }
   if (alFinal || cerca) window.scrollTo(0, document.body.scrollHeight);
 }
 function ajustarAltoChat() { const t = $('chatTxt'); t.style.height = 'auto'; t.style.height = Math.min(t.scrollHeight + 2, 140) + 'px'; }
@@ -3072,8 +3203,8 @@ $('formChat').onsubmit = async e => {
 };
 /* Revisa mensajes nuevos: cada 8 s con el chat abierto, cada minuto en las demás pantallas. */
 setInterval(async () => {
-  if (!sesion || document.hidden || !navigator.onLine || $('portada').hidden === false) return;
-  const abierto = !$('chat').hidden;
+  if (!sesion || !navigator.onLine || $('portada').hidden === false) return;
+  const abierto = !$('chat').hidden && !document.hidden;
   if (!abierto && Date.now() - chatUltimaRevision < 60000) return;
   const n = await chatTraer();
   if (abierto) { if (n) pintarChat(false); }
@@ -3154,7 +3285,11 @@ window.addEventListener('appinstalled', () => { $('btnInstalar').hidden = true; 
   await pintarPendientes();
   if (sesion) {
     try { await cargarCatalogos(); } catch {}
-    if (catalogos) return entrar();
+    if (catalogos) {
+      entrar();
+      if (new URLSearchParams(location.search).get('abrir') === 'chat') { history.replaceState(null, '', location.pathname); setTimeout(() => mostrar('chat'), 300); }
+      return;
+    }
   }
   mostrar('portada');
 })();
