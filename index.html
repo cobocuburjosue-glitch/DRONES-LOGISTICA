@@ -553,7 +553,7 @@
   <button type="button" class="chat-flotante" data-ir="chat" aria-label="Abrir Chat Equipo TACA">
     <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-5A8 8 0 1 1 21 12z"/></svg>
     <span class="globo" id="chatGlobo" hidden></span></button>
-  <p class="version">Versión 22 oct 2026 · check list en modo solo</p>
+  <p class="version">Versión 22 oct 2026 (2) · check list en modo solo</p>
   <div class="pendientes" id="avisoPendientes" hidden>
     <span id="txtPendientes"></span><button type="button" id="btnReintentar">Sincronizar ahora</button>
   </div>
@@ -579,8 +579,8 @@
       <div class="ayuda">Si la finca no está en el maestro, se agrega automáticamente al guardar.</div></label>
     <div class="fila2">
       <label class="campo" id="cCamionCampo"><span>Camión</span><select id="cCamion"><option value="">Seleccione</option></select></label>
-      <label class="campo" id="cVehiculoCampo" hidden><span>Vehículo en que se fue</span><input type="text" id="cVehiculo" class="mayus" placeholder="Ej. PICKUP P-123ABC"></label>
-      <label class="campo"><span>Kilómetros</span><input type="text" id="cKm" inputmode="decimal" placeholder="0"></label>
+      <label class="campo" id="cVehiculoCampo" hidden><span>Placas del vehículo</span><input type="text" id="cVehiculo" class="mayus" placeholder="Ej. P-123ABC"></label>
+      <label class="campo" id="cKmCampo"><span>Kilómetros</span><input type="text" id="cKm" inputmode="decimal" placeholder="0"></label>
     </div>
     <div class="aviso-info ambar" id="cCamionAviso" hidden></div>
     <div id="cSecciones"></div>
@@ -1549,10 +1549,10 @@ function pintarEquipo() {
 }
 /* "Trabajé solo hoy" = se fue en vehículo propio: no llena Camión ni Generadores (ni se valida el camión),
    escribe el vehículo y anota cuántas baterías llevó y cómo entregó limpio su drone. Lo demás sí lo llena. */
-const SECCIONES_SOLO_FUERA = ['Camión', 'Generadores'];
+const SECCIONES_SOLO_FUERA = ['Combustible', 'Camión', 'Generadores'];
 function aplicarModoSolo() {
-  $('cCamionCampo').hidden = soloCheck; $('cVehiculoCampo').hidden = !soloCheck;
-  $('cRol').textContent = $('cLabor').value ? (soloCheck ? 'Trabajó solo en vehículo: no llena Camión ni Generadores; anote cuántas baterías llevó y cómo entregó limpio su drone.'
+  $('cCamionCampo').hidden = soloCheck; $('cVehiculoCampo').hidden = !soloCheck; $('cKmCampo').hidden = soloCheck;
+  $('cRol').textContent = $('cLabor').value ? (soloCheck ? 'Trabajó solo en vehículo: solo anote las placas, cuántas baterías llevó y cómo entregó limpio su drone (no llena Combustible, Camión ni Generadores).'
     : 'Check list completo: lo llena el encargado junto a su equipo del día.') : $('cRol').textContent;
   const secs = [...document.querySelectorAll('#cSecciones .seccion')];
   secs.forEach(sec => sec.hidden = soloCheck && SECCIONES_SOLO_FUERA.includes(sec.dataset.titulo));
@@ -1733,8 +1733,8 @@ $('formCheck').onsubmit = async e => {
   if (!$('cLabor').value) faltan.push('labor');
   if (!$('cFinca').value.trim()) faltan.push('finca');
   if (!soloCheck && !$('cCamion').value) faltan.push('camión');
-  if (soloCheck && !$('cVehiculo').value.trim()) faltan.push('vehículo en que se fue');
-  if (!$('cKm').value.trim()) faltan.push('kilómetros');
+  if (soloCheck && !$('cVehiculo').value.trim()) faltan.push('placas del vehículo');
+  if (!soloCheck && !$('cKm').value.trim()) faltan.push('kilómetros');
   if (!equipoCheck.size && !soloCheck) { faltan.push('su equipo del día'); $('cEquipoCampo').classList.add('falta'); }
   if (!soloCheck && checkDelCamion()) { err.textContent = $('cCamionAviso').textContent; $('cCamionAviso').scrollIntoView({ block: 'center' }); return; }
   const campos = {}; let sinMarcar = 0;
@@ -1764,7 +1764,7 @@ $('formCheck').onsubmit = async e => {
   if (faltan.length) { err.textContent = 'Complete: ' + faltan.join(', ') + '.'; return; }
 
   const reg = { accion: 'guardarChecklist', id: nuevoId(), fecha: leerFecha('cFecha'), usuario: sesion.usuario, token: sesion.token,
-    labor: $('cLabor').value, finca: $('cFinca').value.trim().toUpperCase(), km: $('cKm').value, campos, fotos, solo: soloCheck,
+    labor: $('cLabor').value, finca: $('cFinca').value.trim().toUpperCase(), km: soloCheck ? '' : $('cKm').value, campos, fotos, solo: soloCheck,
     camion: soloCheck ? 'VEHÍCULO ' + $('cVehiculo').value.trim().toUpperCase() : $('cCamion').value,
     equipo: [...equipoCheck] };
   if ($('cObs').value.trim()) campos['Observaciones'] = $('cObs').value.trim();
