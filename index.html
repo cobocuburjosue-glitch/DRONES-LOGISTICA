@@ -315,7 +315,8 @@
   .totales div { background: var(--papel); padding: 14px 12px; }
   .totales.cuatro { grid-template-columns: repeat(2, 1fr); }
   .pestanas.cuatro { grid-template-columns: repeat(2, 1fr); }
-  @media (min-width: 820px) { .pestanas.cuatro { grid-template-columns: repeat(6, 1fr); } }
+  @media (min-width: 820px) { .pestanas.cuatro { grid-template-columns: repeat(6, 1fr); } .pestanas.g-vista { grid-template-columns: repeat(4, 1fr); } }
+  .pestanas.g-vista.tres { grid-template-columns: repeat(3, 1fr); }
   .obs-dia { margin-bottom: 14px; }
   .obs-dia > h3 { font-size: 1rem; margin: 0 0 8px; color: var(--azul-texto); }
   .obs-item { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; background: var(--papel); border: 1.5px solid var(--linea); border-left: 4px solid var(--azul-2); border-radius: 10px; padding: 10px 12px; margin-bottom: 8px; }
@@ -545,7 +546,7 @@
     <button class="opcion solo-piloto" type="button" data-ir="convertidor" hidden><strong>Convertidor de flujos</strong><span>Calcule a cuánto debe ir la bomba del drone</span></button>
     <button class="opcion solo-campo" type="button" data-ir="mezclas" hidden><strong>Mezclas TACA</strong><span id="mezclaOpcionTxt">Registrar la mezcla preparada y ver su variación</span></button>
     <button class="opcion solo-piloto-admin" type="button" data-ir="vuelos" hidden><strong>Dashboard vuelos drones</strong><span>Vuelos de los pilotos: variación real contra L/ha teóricos</span></button>
-    <button class="opcion negra" type="button" data-ir="general"><strong>General aplicado</strong><span>Gráficas por finca y labor, filtradas por fecha</span></button>
+    <button class="opcion negra" type="button" data-ir="general"><strong>General aplicado</strong><span>Sus hectáreas, mezclas TACA, horómetro y check list</span></button>
     <button class="opcion negra solo-admin" type="button" data-ir="control" hidden><strong>Centro de control</strong><span>Mezclas, horómetro, check list, generadores, combustibles y observaciones</span></button>
     <button class="opcion negra" type="button" data-ir="permisos" id="opPermisos" hidden><strong>Permisos de edición</strong><span>Habilitar a quién puede corregir datos y ver el registro de cambios</span><em class="estado pend" id="estadoSolicitudes" hidden></em></button>
     <button class="opcion negra" type="button" data-ir="reportes" id="opReportes" hidden><strong>Generar reportes</strong><span>Enviar a cada usuario el resumen corporativo de su semana</span></button>
@@ -553,7 +554,7 @@
   <button type="button" class="chat-flotante" data-ir="chat" aria-label="Abrir Chat Equipo TACA">
     <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-5A8 8 0 1 1 21 12z"/></svg>
     <span class="globo" id="chatGlobo" hidden></span></button>
-  <p class="version">Versión 22 oct 2026 (2) · check list en modo solo</p>
+  <p class="version">Versión 28 oct 2026 · horómetro del día y General con pestañas</p>
   <div class="pendientes" id="avisoPendientes" hidden>
     <span id="txtPendientes"></span><button type="button" id="btnReintentar">Sincronizar ahora</button>
   </div>
@@ -633,19 +634,11 @@
       <label class="campo"><span>Fecha</span><input type="text" id="hFecha" readonly></label>
       <label class="campo"><span>Piloto</span><input type="text" id="hPiloto" readonly></label>
     </div>
-    <label class="campo"><span>Drone</span><select id="hDrone"></select>
-      <div class="ayuda" id="hUltimo"></div></label>
-    <div class="campo">
-      <span class="campo-titulo">Lecturas finales del drone</span>
-      <div class="horo" id="hGrid">
-        <span class="cab"></span><span class="cab">Lectura final</span><span class="cab">Del día</span>
-        <span class="lbl">Número de vuelos final</span><input type="text" inputmode="numeric" id="hVf" aria-label="Número de vuelos final"><span class="dif" id="hVd">—</span>
-        <span class="lbl">Horas de vuelo final<small class="sub-lbl">como sale en DJI (ej. 1.81)</small></span><input type="text" inputmode="decimal" id="hHf" aria-label="Horas de vuelo final como sale en la plataforma DJI"><span class="dif" id="hHd">—</span>
-        <span class="lbl"></span><span class="reloj" id="hReloj" hidden></span><span></span>
-        <span class="lbl">Litros asperjados final</span><input type="text" inputmode="decimal" id="hLf" aria-label="Litros asperjados final"><span class="dif" id="hLd">—</span>
-      </div>
-      <div class="ayuda">Anote lo que marca el drone al terminar la jornada. "Del día" se calcula solo, restando el último cierre de ese drone. Las horas se escriben tal como salen en la plataforma DJI: los números después del punto son minutos (1.81 = 1 h + 81 min = 2 h 21 min) y la app las pasa a horas de reloj.</div>
-    </div>
+    <div class="campo"><span class="campo-titulo">Drones que voló hoy <span class="opcional">(puede elegir varios)</span></span>
+      <div id="hDrones"></div></div>
+    <div id="hLecturas"></div>
+    <div class="calculo" id="hTotal" hidden></div>
+    <div class="ayuda" style="margin:-8px 0 16px">Anote lo que voló <b>hoy</b> con cada drone. Las horas se escriben tal como salen en la plataforma DJI: los números después del punto son minutos (1.81 = 1 h + 81 min = 2 h 21 min) y la app las pasa a horas de reloj.</div>
     <div class="campo"><label class="campo-titulo" for="hFincaTxt">Fincas aplicadas</label>
       <div class="multi" id="hFincas">
         <div class="chips" id="hFincasSel"></div>
@@ -795,10 +788,9 @@
       <div class="grafica"><h2>Horas de vuelo por drone</h2><div class="lienzo" id="cajaHoDrone"><canvas id="chHoDrone"></canvas></div></div>
       <div class="grafica"><h2>Litros asperjados por piloto</h2><div class="lienzo" id="cajaHoPiloto"><canvas id="chHoPiloto"></canvas></div></div>
     </div>
-    <div class="grafica"><h2>Registro de horómetros</h2><p class="sub">Lo que cargó cada piloto: lectura final y lo que suma en el día (final − cierre anterior del drone; la primera lectura de un drone se toma completa)</p>
+    <div class="grafica"><h2>Registro de horómetros</h2><p class="sub">Lo que voló cada piloto en el día con cada drone</p>
       <div class="tabla-envoltura"><table>
-        <thead><tr><th>Fecha</th><th>Piloto</th><th>Drone</th><th class="n">Vuelos final</th><th class="n">Horas final</th><th class="n">Litros final</th>
-          <th class="n">Vuelos día</th><th class="n">Horas día</th><th class="n">Litros día</th><th>Fincas</th><th>Observaciones</th><th></th></tr></thead>
+        <thead><tr><th>Fecha</th><th>Piloto</th><th>Drone</th><th class="n">Vuelos</th><th class="n">Horas de vuelo</th><th class="n">Litros</th><th>Fincas</th><th>Observaciones</th><th></th></tr></thead>
         <tbody id="chTabla"></tbody></table></div></div>
   </div>
   <div id="ctlCheck" role="tabpanel" hidden>
@@ -910,9 +902,11 @@
 <!-- ============ GENERAL APLICADO ============ -->
 <section id="general" class="pantalla ancha" hidden>
   <div class="barra"><button class="volver" type="button" data-ir="menu">‹ Inicio</button><h2 id="gTitulo">General aplicado</h2></div>
-  <div class="pestanas" role="tablist" id="gVista" hidden>
+  <div class="pestanas cuatro g-vista" role="tablist" id="gVista">
     <button type="button" role="tab" id="gvGen" aria-selected="true">General aplicado</button>
+    <button type="button" role="tab" id="gvMz" aria-selected="false">Mezclas TACA</button>
     <button type="button" role="tab" id="gvHoro" aria-selected="false">Horómetro piloto</button>
+    <button type="button" role="tab" id="gvCk" aria-selected="false">Check list</button>
   </div>
   <div class="filtros">
     <label><span>Desde</span><input type="date" id="gDesde"></label>
@@ -960,12 +954,26 @@
       <div class="grafica"><h2>Horas por drone</h2><div class="lienzo" id="cajaGhDrone"><canvas id="chGhDrone"></canvas></div></div>
       <div class="grafica"><h2>Litros asperjados por drone</h2><div class="lienzo" id="cajaGhLitros"><canvas id="chGhLitros"></canvas></div></div>
     </div>
-    <div class="grafica"><h2>Mis lecturas de horómetro</h2><p class="sub">Lectura final que subió y lo que sumó en el día</p>
+    <div class="grafica"><h2>Mis registros de horómetro</h2><p class="sub">Lo que voló cada día con cada drone</p>
       <div class="tabla-envoltura"><table>
-        <thead><tr><th>Fecha</th><th>Drone</th><th class="n">Vuelos final</th><th class="n">Horas final</th><th class="n">Litros final</th><th class="n">Vuelos día</th><th class="n">Horas día</th><th class="n">Litros día</th><th>Fincas</th></tr></thead>
+        <thead><tr><th>Fecha</th><th>Drone</th><th class="n">Vuelos</th><th class="n">Horas de vuelo</th><th class="n">Litros</th><th>Fincas</th></tr></thead>
         <tbody id="ghTabla"></tbody></table></div></div>
   </div>
   <p class="vacio" id="ghVacio" hidden>No hay lecturas de horómetro en esas fechas.</p>
+  <div id="gCheck" hidden>
+    <div class="totales cuatro">
+      <div><span class="num" id="gkN">0</span><small>Check list en los que participó</small></div>
+      <div><span class="num" id="gkEnc">0</span><small>Como encargado</small></div>
+      <div><span class="num" id="gkFallas">0</span><small>Fallas reportadas</small></div>
+      <div><span class="num" id="gkHoy">—</span><small>Check list de hoy</small></div>
+    </div>
+    <div class="grafica"><h2>Mis check list</h2><p class="sub">Los que usted llenó o en los que el encargado lo eligió en su equipo</p>
+      <div class="tabla-envoltura"><table>
+        <thead><tr><th>Fecha</th><th>Camión / vehículo</th><th>Finca</th><th>Encargado</th><th>Equipo</th><th>Falla</th><th>Fotos</th></tr></thead>
+        <tbody id="gkTabla"></tbody></table></div></div>
+  </div>
+  <p class="vacio" id="gkVacio" hidden>No hay check list en esas fechas.</p>
+  <p class="vacio" id="gmVacio" hidden>No hay mezclas TACA en esas fechas.</p>
   <div id="gMezclas" hidden>
     <h2 class="titulo-bloque">Mezclas TACA · variación</h2>
     <div class="totales cuatro">
@@ -1171,6 +1179,12 @@ function pedirPermisoAvisos() {
 }
 
 let avisoT;
+/* Falta algún dato: mensaje claro, aviso y lleva la vista al mensaje. */
+function faltaDato(err, faltan) {
+  err.textContent = 'Revise de nuevo, falta: ' + faltan.join(', ') + '.';
+  avisar('Revise de nuevo: falta algún dato por llenar.', true);
+  err.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
 function avisar(msg, error, clase) {
   const a = $('aviso'); a.textContent = msg; a.className = 'aviso' + (error ? ' error' : '') + (clase ? ' ' + clase : ''); a.hidden = false;
   clearTimeout(avisoT); avisoT = setTimeout(() => a.hidden = true, clase ? 8000 : 4500);
@@ -1399,7 +1413,7 @@ function llenarSelects(rehacer) {
   if (!$('fDrones').children.length || rehacer) pintarDrones();
   document.querySelectorAll('.sel-sup').forEach(sel => { if (sel.options.length <= 1 || rehacer) llenarSupervisores(sel); });
   if ($('mProducto').options.length <= 1 || rehacer) llenarProductos($('mProducto'));
-  ['hDrone', 'kDrone'].forEach(id => { if ($(id).options.length <= 1 || rehacer) llenarDrones($(id), id === 'kDrone' ? 'Sin drone (escribir a mano)' : 'Seleccione el drone'); });
+  ['kDrone'].forEach(id => { if ($(id).options.length <= 1 || rehacer) llenarDrones($(id), id === 'kDrone' ? 'Sin drone (escribir a mano)' : 'Seleccione el drone'); });
 }
 
 /* ====== Supervisores, productos y drones ======
@@ -1419,7 +1433,7 @@ function llenarSupervisores(sel) {
   sel.innerHTML = '<option value="">Seleccione el supervisor</option>' + Object.entries(grupos).map(([emp, ns]) =>
     `<optgroup label="${esc(emp)}">${ns.map(n => `<option value="${esc(n)}" data-empresa="${esc(emp)}">${esc(n)}</option>`).join('')}</optgroup>`).join('')
     + `<option value="${OTRO}">Otro (escribir el nombre)</option>`;
-  sel.value = v || store.get('ultSup', '') || '';
+  sel.value = v || '';
   sel.onchange = () => { const o = $(sel.id + 'Otro'); o.hidden = sel.value !== OTRO; if (!o.hidden) o.focus(); if (sel.value && sel.value !== OTRO) store.set('ultSup', sel.value); };
   $(sel.id + 'Otro').hidden = sel.value !== OTRO;
 }
@@ -1573,7 +1587,11 @@ function checkDelCamion() {
 }
 function prepararCheck() {
   prepararFecha('cFecha'); $('cEncargado').value = sesion.usuario;
-  if (!equipoCheck.size && !soloCheck) equipoCheck = new Set(store.get('ultEquipo', []).filter(u => ((catalogos && catalogos.integrantes) || []).some(x => x.usuario === u)));
+  // la selección del equipo solo se recuerda el mismo día; cada día nuevo empieza limpia
+  const ult = store.get('ultEquipo2', null);
+  if (!equipoCheck.size && !soloCheck && ult && ult.fecha === hoyISO())
+    equipoCheck = new Set((ult.equipo || []).filter(u => ((catalogos && catalogos.integrantes) || []).some(x => x.usuario === u)));
+  else if (!ult || ult.fecha !== hoyISO()) { equipoCheck = new Set(); soloCheck = false; }
   pintarEquipo(); checkDelCamion();
   pintarSecciones();
   // con señal, trae lo más reciente (horas de generadores y camiones ya llenados) sin borrar lo que se está escribiendo
@@ -1761,14 +1779,14 @@ $('formCheck').onsubmit = async e => {
     else if (c.dataset.req) { c.classList.add('falta'); sinFoto++; }
   });
   if (sinFoto) faltan.push(`${sinFoto} foto(s) de sección`);
-  if (faltan.length) { err.textContent = 'Complete: ' + faltan.join(', ') + '.'; return; }
+  if (faltan.length) return faltaDato(err, faltan);
 
   const reg = { accion: 'guardarChecklist', id: nuevoId(), fecha: leerFecha('cFecha'), usuario: sesion.usuario, token: sesion.token,
     labor: $('cLabor').value, finca: $('cFinca').value.trim().toUpperCase(), km: soloCheck ? '' : $('cKm').value, campos, fotos, solo: soloCheck,
     camion: soloCheck ? 'VEHÍCULO ' + $('cVehiculo').value.trim().toUpperCase() : $('cCamion').value,
     equipo: [...equipoCheck] };
   if ($('cObs').value.trim()) campos['Observaciones'] = $('cObs').value.trim();
-  store.set('ultEquipo', [...equipoCheck]);
+  store.set('ultEquipo2', { fecha: hoyISO(), equipo: [...equipoCheck] });
   // "horas trabajadas anterior" del próximo check list = anterior + horas de hoy (aunque no haya señal)
   if (catalogos) {
     catalogos.genEstado = catalogos.genEstado || {};
@@ -1796,12 +1814,13 @@ $('formCheck').onsubmit = async e => {
 
 /* ====== NUEVO REGISTRO ====== */
 let seleccionDrones = new Set(), paramsManual = {};
+/* Cada vez que se abre, el Nuevo registro aparece limpio (no se copian datos de otros días ni del check list). */
 function prepararRegistro() {
+  $('formRegistro').reset(); seleccionDrones.clear(); paramsManual = {}; pintarDrones(); pintarParametros();
+  $('laborDesc').textContent = ''; $('fQ').textContent = 'Q 0.00'; $('regError').textContent = '';
+  $('fSupervisor').value = ''; $('fSupervisorOtro').value = ''; $('fSupervisorOtro').hidden = true;
   prepararFecha('fFecha'); $('fUsuario').value = sesion.usuario;
-  const ch = (store.get('checks', {})[sesion.usuario]) || {};
-  const usar = ch.fecha === hoyISO() && !$('fLabor').value && !$('fFinca').value;
-  if (usar) { $('fLabor').value = ch.labor; $('fCamion').value = ch.camion; $('fFinca').value = ch.finca; $('fLabor').onchange(); }
-  $('desdeCheck').hidden = !usar;
+  $('desdeCheck').hidden = true;
 }
 function pintarDrones() {
   const grupos = {};
@@ -1895,7 +1914,7 @@ $('formRegistro').onsubmit = async e => {
     return p;
   });
   if (parametros.some(p => CAMPOS_P.some(([k]) => p[k] === ''))) faltan.push('parámetros del drone');
-  if (faltan.length) { err.textContent = 'Complete: ' + faltan.join(', ') + '.'; return; }
+  if (faltan.length) return faltaDato(err, faltan);
 
   const guardado = await encolar({ accion: 'guardar', id: nuevoId(), fecha: leerFecha('fFecha'), usuario: sesion.usuario, token: sesion.token,
     labor: $('fLabor').value, camion: $('fCamion').value, drones: [...seleccionDrones], parametros,
@@ -2022,6 +2041,7 @@ async function cargarGeneral() {
     datosGeneral = r.filas.filter(f => (!desde || f.fecha >= desde) && (!hasta || f.fecha <= hasta));
     mezclasGeneral = (r.mezclas || []).filter(f => (!desde || f.fecha >= desde) && (!hasta || f.fecha <= hasta));
     horoGeneral = (r.horometros || []).filter(f => (!desde || f.fecha >= desde) && (!hasta || f.fecha <= hasta));
+    checkGeneral = (r.checklists || []).filter(f => (!desde || f.fecha >= desde) && (!hasta || f.fecha <= hasta));
     permisoEd = { on: r.permiso && !guardado, solicitud: r.solicitud };
     avisoGuardado($('gGuardado'), guardado);
     generalInfo = { error: '', enRangoTodos: r.enRangoTodos || 0, desde, hasta };
@@ -2029,35 +2049,54 @@ async function cargarGeneral() {
     const msg = sinRed(err) ? 'Sin conexión y sin datos guardados para ver las gráficas.' : err.message;
     avisar(msg, true);
     generalInfo = { error: msg, desde, hasta };
-    datosGeneral = []; mezclasGeneral = []; horoGeneral = []; pintarGeneral(); return;
+    datosGeneral = []; mezclasGeneral = []; horoGeneral = []; checkGeneral = []; pintarGeneral(); return;
   }
   if (!sesion.admin) { datosGeneral = datosGeneral.filter(r => r.usuario === sesion.usuario); mezclasGeneral = mezclasGeneral.filter(r => r.usuario === sesion.usuario); }
   if (sesion.admin) {
-    const actual = $('gUsuario').value; const us = [...new Set(datosGeneral.concat(mezclasGeneral, horoGeneral).map(r => r.usuario))].sort();
+    const actual = $('gUsuario').value; const us = [...new Set(datosGeneral.concat(mezclasGeneral, horoGeneral, checkGeneral).map(r => r.usuario))].sort();
     $('gUsuario').innerHTML = '<option value="">Todos</option>' + us.map(u => `<option>${esc(u)}</option>`).join('');
     if (us.includes(actual)) $('gUsuario').value = actual;
   }
   pintarGeneral();
 }
-let mezclasGeneral = [], horoGeneral = [], generalInfo = {}, vistaGeneral = 'gen';
+let mezclasGeneral = [], horoGeneral = [], checkGeneral = [], generalInfo = {}, vistaGeneral = 'gen';
 /* Botón "Horómetro piloto" dentro de General: para pilotos (y el Administrador). */
+const TITULOS_GEN = { gen: 'General aplicado', mz: 'Mezclas TACA', horo: 'Horómetro piloto', ck: 'Check list' };
 function elegirVistaGeneral(v) {
   vistaGeneral = v;
-  $('gvGen').setAttribute('aria-selected', v === 'gen'); $('gvHoro').setAttribute('aria-selected', v === 'horo');
-  $('gTitulo').textContent = v === 'horo' ? 'Horómetro piloto' : 'General aplicado';
+  [['gvGen', 'gen'], ['gvMz', 'mz'], ['gvHoro', 'horo'], ['gvCk', 'ck']].forEach(([id, k]) => $(id).setAttribute('aria-selected', v === k));
+  $('gTitulo').textContent = TITULOS_GEN[v];
   pintarGeneral();
 }
 $('gvGen').onclick = () => elegirVistaGeneral('gen');
+$('gvMz').onclick = () => elegirVistaGeneral('mz');
 $('gvHoro').onclick = () => elegirVistaGeneral('horo');
+$('gvCk').onclick = () => elegirVistaGeneral('ck');
+/* Check list del usuario: los que llenó como encargado o en los que lo eligieron en el equipo. */
+function pintarCheckGeneral(cks, u) {
+  $('gkVacio').hidden = cks.length > 0; $('gCheck').hidden = !cks.length;
+  if (!cks.length) return;
+  $('gkN').textContent = cks.length;
+  $('gkEnc').textContent = u ? cks.filter(c => c.usuario === u).length : cks.length;
+  $('gkFallas').textContent = cks.filter(c => c.falla).length;
+  const hoy = cks.find(c => c.fecha === hoyISO());
+  $('gkHoy').textContent = hoy ? 'Lleno' : 'Pendiente';
+  $('gkHoy').style.color = hoy ? 'var(--verde)' : 'var(--ambar)';
+  $('gkTabla').innerHTML = cks.slice().sort((a, b) => b.fecha.localeCompare(a.fecha) || b.fila - a.fila).map(c => `<tr>
+    <td>${fechaLarga(c.fecha)}</td><td>${esc(c.camion || '—')}</td><td class="envolver">${esc(c.finca)}</td>
+    <td>${esc(c.usuario)}${c.usuario === u ? ' <span class="tag ok">Usted</span>' : ''}</td>
+    <td class="envolver">${(c.equipo || []).length ? esc(c.equipo.join(', ')) : '<span class="tag gris">Solo</span>'}</td>
+    <td class="envolver">${c.falla ? `<span class="tag no">Falla</span> ${esc(c.falla)}` : '—'}</td>
+    <td>${(c.fotos || []).length}</td></tr>`).join('');
+}
 function pintarHoroGeneral(hs) {
   $('ghVacio').hidden = hs.length > 0; $('gHoro').hidden = !hs.length;
   if (!hs.length) return;
   const sum = k => hs.reduce((s, h) => s + (Number(h[k]) || 0), 0);
-  $('ghV').textContent = fmt2(sum('vuelos')); $('ghH').textContent = fmt2(sum('horas')) + ' h'; $('ghL').textContent = fmt2(sum('litros')) + ' L'; $('ghN').textContent = hs.length;
+  $('ghV').textContent = fmt2(sum('vuelos')); $('ghH').textContent = horaReloj(sum('horas')); $('ghL').textContent = fmt2(sum('litros')) + ' L'; $('ghN').textContent = hs.length;
   $('ghTabla').innerHTML = hs.slice().sort((a, b) => b.fecha.localeCompare(a.fecha) || b.fila - a.fila).map(h => `<tr>
     <td>${fechaLarga(h.fecha)}${sesion.admin ? `<br><small>${esc(h.usuario)}</small>` : ''}</td><td>${esc(h.drone)}</td>
-    <td class="n">${fmt2(h.vf)}</td><td class="n">${fmt2(h.hf)}</td><td class="n">${fmt2(h.lf)}</td>
-    <td class="n"><b>${fmt2(h.vuelos)}</b></td><td class="n"><b>${fmt2(h.horas)}</b></td><td class="n"><b>${fmt2(h.litros)}</b></td>
+    <td class="n"><b>${fmt2(h.vuelos)}</b></td><td class="n"><b>${horaReloj(h.horas)}</b></td><td class="n"><b>${fmt2(h.litros)}</b></td>
     <td class="envolver">${esc(h.fincas)}</td></tr>`).join('');
   if (!window.Chart) return;
   estiloGraficas();
@@ -2084,18 +2123,16 @@ function pintarGeneral() {
   const u = sesion.admin ? $('gUsuario').value : sesion.usuario;
   const filas = datosGeneral.filter(r => !u || r.usuario === u);
   const mz = mezclasGeneral.filter(r => !u || r.usuario === u);
+  // Pestañas: General aplicado, Mezclas TACA y Check list para todos; Horómetro piloto para pilotos (y el Administrador)
   const verHoro = esPiloto() || sesion.admin;
-  $('gVista').hidden = !verHoro;
+  $('gvHoro').hidden = !verHoro; $('gVista').classList.toggle('tres', !verHoro);
   if (!verHoro && vistaGeneral === 'horo') vistaGeneral = 'gen';
-  if (vistaGeneral === 'horo') {
-    ['gContenido', 'gMezclas', 'gVacio'].forEach(id => $(id).hidden = true);
-    pintarHoroGeneral(horoGeneral.filter(r => !u || r.usuario === u));
-    return;
-  }
-  $('gHoro').hidden = true; $('ghVacio').hidden = true;
-  $('gVacio').hidden = filas.length > 0 || mz.length > 0; $('gContenido').hidden = !filas.length;
+  ['gContenido', 'gMezclas', 'gVacio', 'gHoro', 'ghVacio', 'gCheck', 'gkVacio', 'gmVacio'].forEach(id => $(id).hidden = true);
+  if (vistaGeneral === 'horo') { pintarHoroGeneral(horoGeneral.filter(r => !u || r.usuario === u)); return; }
+  if (vistaGeneral === 'ck') { pintarCheckGeneral(checkGeneral.filter(c => !u || c.usuario === u || (c.equipo || []).includes(u)), u); return; }
+  if (vistaGeneral === 'mz') { $('gmVacio').hidden = mz.length > 0; pintarMezclasGeneral(mz); return; }
+  $('gVacio').hidden = filas.length > 0; $('gContenido').hidden = !filas.length;
   if (!$('gVacio').hidden) pintarVacioGeneral(u || (sesion.admin ? 'ningún colaborador' : sesion.usuario));
-  pintarMezclasGeneral(mz);
   if (!filas.length) return;
   const adm = sesion.admin;
   const totHa = filas.reduce((s, r) => s + r.ha, 0), totQ = filas.reduce((s, r) => s + (r.quetzales || 0), 0);
@@ -2466,48 +2503,65 @@ const aHM = h => { const tot = Math.round(h * 60); return Math.floor(tot / 60) +
 
 /* ====== HORÓMETRO PILOTO ======
    El piloto anota solo las lecturas FINALES. Lo del día = final − último cierre de ese drone. */
-const H_CAMPOS = ['hVf', 'hHf', 'hLf', 'hObs'];
-let fincasHoro = [];
-const ultimoCierre = d => d && catalogos.horometros ? catalogos.horometros[d] : null;
+/* Registro del día: el piloto elige uno o varios drones y anota lo que voló HOY con cada uno
+   (vuelos, horas como salen en DJI y litros). No se compara con días anteriores. */
+let fincasHoro = [], dronesHoro = [], lecturasHoro = {};
 function prepararHoro() {
   prepararFecha('hFecha'); $('hPiloto').value = sesion.usuario;
-  llenarDrones($('hDrone'), 'Seleccione el drone');
   bd.get('borrador:horo:' + sesion.usuario).then(b => {
-    if (b) {
-      $('hDrone').value = b.hDrone || '';
-      H_CAMPOS.forEach(k => { if (b[k] != null) $(k).value = b[k]; });
-      fincasHoro = b.fincas || [];
-      pintarFincasHoro();
+    if (b && b.fecha === hoyISO() && Array.isArray(b.drones)) {
+      dronesHoro = b.drones; lecturasHoro = b.lecturas || {}; fincasHoro = b.fincas || []; $('hObs').value = b.hObs || '';
     }
-    pintarUltimo(); calcularHoro();
-  }).catch(() => {});
+    pintarDronesHoro(); pintarFincasHoro();
+  }).catch(() => pintarDronesHoro());
   cargarMisRegistros('horometro');
 }
-function pintarUltimo() {
-  const d = $('hDrone').value, u = ultimoCierre(d);
-  $('hUltimo').textContent = !d ? '' : u ? `Último cierre de ${d}: ${fechaLarga(u.fecha)} (${u.piloto}) — ${fmt2(u.vuelos)} vuelos, ${horaReloj(u.horas)}, ${fmt2(u.litros)} L.`
-    : `Primera lectura de ${d}: se refleja completa (inicio en 0).`;
-}
-$('hDrone').onchange = () => { pintarUltimo(); calcularHoro(); guardarBorradorHoro(); };
-function calcularHoro() {
-  const u = ultimoCierre($('hDrone').value);
-  [['vuelos', 'hVf', 'hVd', n2], ['horas', 'hHf', 'hHd', leerHorasDJI], ['litros', 'hLf', 'hLd', n2]].forEach(([k, z, d, leer]) => {
-    const f = leer($(z).value), el = $(d), i = u ? Number(u[k]) : 0;   // primera lectura: inicio 0
-    if (f == null) { el.textContent = '—'; el.classList.remove('mal'); return; }
-    el.textContent = k === 'horas' ? horaReloj(f - i) : fmt2(f - i); el.classList.toggle('mal', f < i);
+function pintarDronesHoro() {
+  const grupos = {};
+  ((catalogos && catalogos.drones) || []).forEach(d => (grupos[d.tipo] = grupos[d.tipo] || []).push(d.numero));
+  $('hDrones').innerHTML = Object.entries(grupos).map(([t, ns]) => `<div class="grupo-drone"><small>${esc(t)}</small><div class="chips">${
+    ns.map(n => `<button type="button" class="chip" aria-pressed="${dronesHoro.includes(n)}" data-hd="${esc(n)}">${esc(n)}</button>`).join('')}</div></div>`).join('');
+  $('hDrones').querySelectorAll('[data-hd]').forEach(b => b.onclick = () => {
+    const n = b.dataset.hd;
+    dronesHoro = dronesHoro.includes(n) ? dronesHoro.filter(x => x !== n) : dronesHoro.concat(n);
+    pintarDronesHoro(); guardarBorradorHoro();
   });
-  const hf = leerHorasDJI($('hHf').value), rl = $('hReloj');
-  rl.hidden = hf == null;
-  if (hf != null) rl.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> ${horaReloj(hf)} de vuelo`;
+  pintarLecturasHoro();
+}
+function pintarLecturasHoro() {
+  $('hLecturas').innerHTML = dronesHoro.map(n => {
+    const l = lecturasHoro[n] || {};
+    return `<div class="param horo-drone" data-hdr="${esc(n)}"><b>${esc(n)}</b><div class="fila3">
+      <label><span>Vuelos</span><input type="text" inputmode="numeric" data-k="vuelos" value="${esc(l.vuelos || '')}" placeholder="0"></label>
+      <label><span>Horas DJI</span><input type="text" inputmode="decimal" data-k="horas" value="${esc(l.horas || '')}" placeholder="1.81"></label>
+      <label><span>Litros</span><input type="text" inputmode="decimal" data-k="litros" value="${esc(l.litros || '')}" placeholder="0"></label></div>
+      <div class="reloj" data-reloj hidden></div></div>`;
+  }).join('');
+  $('hLecturas').querySelectorAll('.horo-drone').forEach(caja => {
+    const n = caja.dataset.hdr;
+    caja.querySelectorAll('input').forEach(inp => {
+      soloNumeros(inp, inp.dataset.k === 'vuelos' ? '' : '.:');
+      inp.addEventListener('input', () => { (lecturasHoro[n] = lecturasHoro[n] || {})[inp.dataset.k] = inp.value; pintarRelojes(); guardarBorradorHoro(); });
+    });
+  });
+  pintarRelojes();
+}
+function pintarRelojes() {
+  let v = 0, h = 0, l = 0;
+  $('hLecturas').querySelectorAll('.horo-drone').forEach(caja => {
+    const x = lecturasHoro[caja.dataset.hdr] || {}, hh = leerHorasDJI(x.horas), rl = caja.querySelector('[data-reloj]');
+    rl.hidden = hh == null;
+    if (hh != null) rl.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> ${horaReloj(hh)} de vuelo`;
+    v += n2(x.vuelos) || 0; h += hh || 0; l += n2(x.litros) || 0;
+  });
+  $('hTotal').hidden = dronesHoro.length < 2;
+  $('hTotal').innerHTML = `<span>Total del día (${dronesHoro.length} drones)</span><span class="num" style="font-size:1.15rem">${fmt2(v)} vuelos · ${horaReloj(h)} · ${fmt2(l)} L</span>`;
 }
 /* El borrador se guarda en el teléfono con cada cambio: si se cierra la app, no se pierde. */
 function guardarBorradorHoro() {
-  const b = { hDrone: $('hDrone').value, fincas: fincasHoro.slice(), fecha: hoyISO() };
-  H_CAMPOS.forEach(k => b[k] = $(k).value);
-  return bd.set('borrador:horo:' + sesion.usuario, b).catch(() => {});
+  return bd.set('borrador:horo:' + sesion.usuario, { drones: dronesHoro, lecturas: lecturasHoro, fincas: fincasHoro.slice(), hObs: $('hObs').value, fecha: hoyISO() }).catch(() => {});
 }
-soloNumeros($('hVf')); soloNumeros($('hLf'), '.'); soloNumeros($('hHf'), '.:');
-H_CAMPOS.forEach(id => $(id).addEventListener('input', () => { calcularHoro(); guardarBorradorHoro(); }));
+$('hObs').addEventListener('input', guardarBorradorHoro);
 function pintarFincasHoro() {
   $('hFincasSel').innerHTML = fincasHoro.map(f => `<button type="button" class="chip" aria-pressed="true" data-f="${esc(f)}" aria-label="Quitar ${esc(f)}">${esc(f)}<span class="x" aria-hidden="true">×</span></button>`).join('');
   $('hFincasSel').querySelectorAll('[data-f]').forEach(b => b.onclick = () => {
@@ -2521,28 +2575,24 @@ autocompletar($('hFincaTxt'), {
 $('formHoro').onsubmit = async e => {
   e.preventDefault();
   const err = $('horoError'); err.textContent = '';
-  const v = { vf: n2($('hVf').value), hf: leerHorasDJI($('hHf').value), lf: n2($('hLf').value) };
   const faltan = [];
-  if (!$('hDrone').value) faltan.push('drone');
-  if (v.vf == null) faltan.push('número de vuelos final');
-  if (v.hf == null) faltan.push('horas de vuelo final');
-  if (v.lf == null) faltan.push('litros asperjados final');
+  if (!dronesHoro.length) faltan.push('drone');
+  const drones = dronesHoro.map(n => {
+    const x = lecturasHoro[n] || {}, hh = leerHorasDJI(x.horas);
+    if (n2(x.vuelos) == null) faltan.push('vuelos de ' + n);
+    if (hh == null) faltan.push('horas de ' + n);
+    if (n2(x.litros) == null) faltan.push('litros de ' + n);
+    return { drone: n, vuelos: n2(x.vuelos), horas: hh == null ? '' : aHM(hh), horasDJI: String(x.horas || '').trim(), litros: n2(x.litros) };
+  });
   if ($('hFincaTxt').value.trim()) { fincasHoro.push($('hFincaTxt').value.trim().toUpperCase()); $('hFincaTxt').value = ''; pintarFincasHoro(); }
   if (!fincasHoro.length) faltan.push('fincas aplicadas');
-  if (faltan.length) { err.textContent = 'Complete: ' + faltan.join(', ') + '.'; return; }
-  const drone = $('hDrone').value, u = ultimoCierre(drone);
-  if (u && (v.vf < u.vuelos || v.hf < u.horas || v.lf < u.litros) &&
-      !confirm(`Alguna lectura es menor que el último cierre de ${drone} (${fmt2(u.vuelos)} vuelos, ${horaReloj(u.horas)}, ${fmt2(u.litros)} L). ¿Guardar de todos modos? (por ejemplo, si el contador del drone se reinició)`)) return;
-  const fechaHoro = leerFecha('hFecha');
-  const ok = await encolar({ accion: 'guardarHorometro', id: nuevoId(), fecha: fechaHoro, usuario: sesion.usuario, token: sesion.token,
-    drone, vf: v.vf, hf: aHM(v.hf), horasDJI: $('hHf').value.trim(), lf: v.lf, fincas: fincasHoro.slice(), observaciones: $('hObs').value.trim() });
+  if (faltan.length) return faltaDato(err, faltan);
+  const ok = await encolar({ accion: 'guardarHorometro', id: nuevoId(), fecha: leerFecha('hFecha'), usuario: sesion.usuario, token: sesion.token,
+    drones, fincas: fincasHoro.slice(), observaciones: $('hObs').value.trim() });
   if (!ok) return;
-  // este cierre será la base del próximo, aunque no haya señal
-  catalogos.horometros = catalogos.horometros || {};
-  catalogos.horometros[drone] = { fecha: fechaHoro, piloto: sesion.usuario, vuelos: v.vf, horas: Math.round(v.hf * 100) / 100, litros: v.lf };
-  store.set('catalogos', catalogos);
   await bd.del('borrador:horo:' + sesion.usuario).catch(() => {});
-  $('formHoro').reset(); fincasHoro = []; pintarFincasHoro(); calcularHoro(); pintarUltimo();
+  $('formHoro').reset(); prepararFecha('hFecha'); $('hPiloto').value = sesion.usuario;
+  fincasHoro = []; dronesHoro = []; lecturasHoro = {}; pintarFincasHoro(); pintarDronesHoro();
   cargarMisRegistros('horometro');
   await sincronizarPendientes();
 };
@@ -2678,7 +2728,7 @@ $('formMezcla').onsubmit = async e => {
   if (!(t > 0)) faltan.push('litros totales');
   if (so == null) faltan.push('litros sobrantes');
   if (!fotoMezcla && !esPiloto()) { faltan.push('foto de la mezcla'); $('mFotoCaja').classList.add('falta'); }
-  if (faltan.length) { err.textContent = 'Complete: ' + faltan.join(', ') + '.'; return; }
+  if (faltan.length) return faltaDato(err, faltan);
   if (so > t) { err.textContent = 'Los litros sobrantes no pueden ser más que los totales.'; return; }
   const ok = await encolar({ accion: 'guardarMezcla', id: nuevoId(), fecha: leerFecha('mFecha'), usuario: sesion.usuario, token: sesion.token,
     finca: $('mFinca').value.trim().toUpperCase(), supervisor: sup.supervisor, empresa: sup.empresa, productos: prod,
@@ -2716,11 +2766,10 @@ async function cargarMisRegistros(tipo) {
         <small>Sobrante: ${fmt2(Number(r.sobrante))} L${(v => v.varPct != null ? ` · Dosis: <b class="${Math.abs(v.varPct) > 5 ? 'var-alta' : 'var-pos'}">${fmt2(v.lphReal)} L/ha (${conSigno(v.varPct)}%)</b>` : '')(variacionMezcla(Number(r.total), Number(r.sobrante), n2(String(r.lph ?? '')), n2(String(r.ha ?? ''))))}${pendiente ? ' · <span class="tag gris">Sin enviar</span>' : ''}${r.error ? ` · <span class="tag no">${esc(r.error)}</span>` : ''}</small></div>
         <span class="cifra">${fmt2(Number(r.total))} L</span>
         ${!pendiente && puede ? `<button type="button" class="btn-editar" data-editar="${r.fila}">Editar</button>` : ''}</div>`
-    : `<div class="tarjeta-reg"><div class="info"><b>${esc(r.drone)} · ${pendiente ? 'final ' + fmt2(r.vf) : fmt2(r.vuelos)} vuelos</b>
-        <small>${fechaLarga(r.fecha)} · ${pendiente ? `lectura final ${horaReloj(leerHoras(r.hf))} · ${fmt2(r.lf)} L`
-          : `${horaReloj(r.horas)} · ${fmt2(r.litros)} L en el día`}</small>
+    : (pendiente && Array.isArray(r.drones) ? r.drones.map(d => ({ drone: d.drone, vuelos: d.vuelos, horas: leerHoras(d.horas), litros: d.litros })) : [r]).map(x => `<div class="tarjeta-reg"><div class="info"><b>${esc(x.drone)} · ${fmt2(pendiente && !r.drones ? r.vf : x.vuelos)} vuelos</b>
+        <small>${fechaLarga(r.fecha)} · ${horaReloj(pendiente && !r.drones ? leerHoras(r.hf) : x.horas)} · ${fmt2(pendiente && !r.drones ? r.lf : x.litros)} L en el día</small>
         <small>${esc(Array.isArray(r.fincas) ? r.fincas.join(', ') : r.fincas)}${pendiente ? ' · <span class="tag gris">Sin enviar</span>' : ''}${r.error ? ` · <span class="tag no">${esc(r.error)}</span>` : ''}</small></div>
-        ${!pendiente && puede ? `<button type="button" class="btn-editar" data-editar="${r.fila}">Editar</button>` : ''}</div>`;
+        ${!pendiente && puede ? `<button type="button" class="btn-editar" data-editar="${r.fila}">Editar</button>` : ''}</div>`).join('');
   cont.innerHTML = (guardado ? `<div class="datos-guardados">Sin conexión: lista guardada el ${horaCorta(guardado)}.</div>` : '')
     + pend.slice().reverse().map(r => tarjeta(r, true)).join('') + filas.map(r => tarjeta(r, false)).join('')
     || '<p class="vacio">Todavía no hay registros.</p>';
@@ -2738,9 +2787,8 @@ const FORM_EDIT = {
     { k: 'observaciones', l: 'Observaciones', t: 'area' }] },
   horometro: { titulo: 'Editar horómetro', campos: [
     { k: 'fecha', l: 'Fecha', t: 'fecha' }, { k: 'drone', l: 'Drone', t: 'drone' },
-    { k: 'vf', l: 'Vuelos final', t: 'num', par: 1 }, { k: 'vi', l: 'Vuelos inicio (cierre anterior)', t: 'num', opc: 1, par: 2 },
-    { k: 'hf', l: 'Horas final', t: 'horas', par: 1 }, { k: 'hi', l: 'Horas inicio (cierre anterior)', t: 'horas', opc: 1, par: 2 },
-    { k: 'lf', l: 'Litros final', t: 'num', par: 1 }, { k: 'li', l: 'Litros inicio (cierre anterior)', t: 'num', opc: 1, par: 2 },
+    { k: 'vf', l: 'Vuelos del día', t: 'num', par: 1 }, { k: 'lf', l: 'Litros del día', t: 'num', par: 2 },
+    { k: 'hf', l: 'Horas de vuelo del día (2:21 o 2.35)', t: 'horas' },
     { k: 'fincas', l: 'Fincas aplicadas (separe con comas)', t: 'texto', mayus: 1 },
     { k: 'observaciones', l: 'Observaciones', t: 'area' }] }
 };
@@ -3079,7 +3127,7 @@ function pintarControl() {
     $('czTabla').querySelectorAll('[data-mz]').forEach(b => b.onclick = () => abrirEditorFila('mezcla', mz.find(x => x.fila == b.dataset.mz), cargarControl));
   } else {
     $('chVuelos').textContent = fmt2(hs.reduce((s, h) => s + h.vuelos, 0));
-    $('chHoras').textContent = fmt2(hs.reduce((s, h) => s + h.horas, 0)) + ' h';
+    $('chHoras').textContent = horaReloj(hs.reduce((s, h) => s + h.horas, 0));
     $('chLitros').textContent = fmt2(hs.reduce((s, h) => s + h.litros, 0)) + ' L';
     $('chN').textContent = hs.length;
     $('chBase').hidden = true;
@@ -3087,8 +3135,7 @@ function pintarControl() {
     barrasHorizontales('chHoPiloto', 'cajaHoPiloto', suma(hs, 'usuario', 'litros'), fL, c2);
     $('chTabla').innerHTML = hs.slice().sort((a, b) => b.fecha.localeCompare(a.fecha) || b.fila - a.fila).map(h => `<tr>
       <td>${fechaLarga(h.fecha)}${h.hora ? `<br><small>${esc(h.hora)}</small>` : ''}</td><td>${esc(h.usuario)}</td><td>${esc(h.drone)}</td>
-      <td class="n"><b>${fmt2(h.vf)}</b></td><td class="n"><b>${fmt2(h.hf)}</b></td><td class="n"><b>${fmt2(h.lf)}</b></td>
-      <td class="n">${fmt2(h.vuelos)}</td><td class="n">${fmt2(h.horas)}</td><td class="n">${fmt2(h.litros)}</td>
+      <td class="n"><b>${fmt2(h.vuelos)}</b></td><td class="n"><b>${horaReloj(h.horas)}</b></td><td class="n"><b>${fmt2(h.litros)}</b></td>
       <td class="envolver">${esc(h.fincas)}</td><td class="envolver">${esc(h.observaciones || '—')}</td>
       <td><button type="button" class="btn-editar" data-ho="${h.fila}">Editar</button></td></tr>`).join('');
     $('chTabla').querySelectorAll('[data-ho]').forEach(b => b.onclick = () => abrirEditorFila('horometro', hs.find(x => x.fila == b.dataset.ho), cargarControl));
