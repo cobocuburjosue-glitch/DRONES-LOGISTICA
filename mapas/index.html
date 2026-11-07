@@ -831,7 +831,7 @@ input,select,textarea{font:inherit}
 .attr input{flex:1;min-width:0;border:1px solid var(--line);border-radius:10px;padding:9px 10px;background:#fbfaf8}
 .attr button{width:36px;flex:none;border-radius:10px;background:#eeebe5;font-size:18px}
 label.btn{cursor:pointer}
-.lbl{background:none;border:0;box-shadow:none;padding:0;font-weight:700;font-size:12px;color:#111;text-shadow:0 0 3px #fff,0 0 3px #fff,0 0 2px #fff;white-space:nowrap}
+.lbl{background:rgba(255,255,255,.92);border:1.5px solid #0f555b;border-radius:7px;box-shadow:0 1px 4px rgba(0,0,0,.35);padding:1px 6px;font-weight:800;font-size:12px;line-height:16px;color:#0f555b;letter-spacing:.3px;white-space:nowrap;font-variant-numeric:tabular-nums}
 .lbl::before{display:none}
 .leaflet-popup-content{margin:12px 14px;font-size:14px;line-height:1.4}
 .leaflet-popup-content table{border-collapse:collapse;font-size:13px}
@@ -1709,10 +1709,18 @@ function buildLayer(meta,data){
       labels.forEach(f=>{ const c=f.geometry.coordinates, ll=[c[1],c[0]];
         const t=L.tooltip({ permanent:true, direction:'center', className:'lbl', interactive:true }).setLatLng(ll).setContent(esc((f.properties||{}).name||''));
         t.on('click',e=>{ if(e&&e.originalEvent) L.DomEvent.stopPropagation(e); if(modeTap(ll)) return; open(f,ll); }); lg.addLayer(t); });
-      const minZ=labels.length>300?15:labels.length>80?14:12;
-      const upd=()=>{ if(!view.map) return; const on=view.map.getZoom()>=minZ; if(on&&!view.map.hasLayer(lg)) lg.addTo(view.map); if(!on&&view.map.hasLayer(lg)) view.map.removeLayer(lg); };
-      g.on('add',()=>{ view.map.on('zoomend',upd); upd(); });
-      g.on('remove',()=>{ view.map.off('zoomend',upd); view.map.removeLayer(lg); });
+      const minZ=labels.length>80?14:12, todas=lg.getLayers(); lg.clearLayers();
+      // solo se dibujan las etiquetas que caen en pantalla (con miles de lotes el mapa sigue fluido)
+      const upd=()=>{ if(!view.map) return; const on=view.map.getZoom()>=minZ;
+        if(!on){ if(view.map.hasLayer(lg)) view.map.removeLayer(lg); return; }
+        const b=view.map.getBounds().pad(0.25), puestas=[];
+        // no se encima una etiqueta sobre otra: si choca, se esconde hasta acercarse más
+        todas.forEach(t=>{ let vis=b.contains(t.getLatLng());
+          if(vis){ const q=view.map.latLngToContainerPoint(t.getLatLng()); vis=!puestas.some(o=>Math.abs(o.x-q.x)<66&&Math.abs(o.y-q.y)<22); if(vis) puestas.push(q); }
+          if(vis&&!lg.hasLayer(t)) lg.addLayer(t); else if(!vis&&lg.hasLayer(t)) lg.removeLayer(t); });
+        if(!view.map.hasLayer(lg)) lg.addTo(view.map); };
+      g.on('add',()=>{ view.map.on('moveend',upd); upd(); });
+      g.on('remove',()=>{ view.map.off('moveend',upd); view.map.removeLayer(lg); });
     }
     g._search=feats.filter(f=>f.geometry).map(f=>({ f, txt:featText(f) }));
   }
@@ -2281,19 +2289,20 @@ if('serviceWorker' in navigator && /^https?:$/.test(location.protocol)){ navigat
   receiveShared();
   precargarTACA();
 })();
-/* Mapas de Soluciones TACA que vienen ya cargados (se importan solos la primera vez que se abre). */
-const PRECARGADOS=[
-  ['precargados/maestro-lotes-26-27.kmz','Maestro lotes 26-27 oficial agosto.kmz'],
-  ['precargados/mosaico-lotes-inafeb-26-27.kmz','Mosaico lotes INAFEB 26-27.kmz'],
-  ['precargados/terceros-26-27.kmz','Terceros oficial 26-27.kmz']];
+/* Mapa de Soluciones TACA que viene ya cargado: un solo mapa con todos los lotes y su número.
+   Se revisa en la base del teléfono (no en una marca aparte), así siempre queda uno y sin duplicados. */
+const PRECARGADO=['precargados/lotes-taca-26-27.kmz','Lotes TACA 26-27.kmz'];
+const PRECARGADOS_VIEJOS=['Maestro lotes 26-27 oficial agosto.kmz','Mosaico lotes INAFEB 26-27.kmz','Terceros oficial 26-27.kmz'];
 async function precargarTACA(){
-  let hechos=[]; try{ hechos=JSON.parse(localStorage.getItem('taca-mapas-precargados')||'[]'); }catch(e){}
-  const faltan=PRECARGADOS.filter(([u])=>!hechos.includes(u)); if(!faltan.length) return;
-  const fs=[];
-  for(const [u,n] of faltan){ try{ const r=await fetch(u); if(r.ok){ fs.push(new File([await r.blob()], n, { type:'application/vnd.google-earth.kmz' })); hechos.push(u); } }catch(e){} }
-  if(!fs.length) return;
-  await importFiles(fs);
-  try{ localStorage.setItem('taca-mapas-precargados', JSON.stringify(hechos)); }catch(e){}
+  try{
+    const maps=await dbAll('maps');
+    const viejos=maps.filter(m=>PRECARGADOS_VIEJOS.includes(m.file));
+    for(const m of viejos){ const fs=await featsOf(m.id); await tx(['maps','data','feats'],'readwrite',t=>{ t.objectStore('maps').delete(m.id); t.objectStore('data').delete(m.id); fs.forEach(f=>t.objectStore('feats').delete(f.id)); }); }
+    const ya=maps.some(m=>m.file===PRECARGADO[1]);
+    if(ya){ if(viejos.length) await renderLibrary(); return; }
+    const r=await fetch(PRECARGADO[0]); if(!r.ok){ if(viejos.length) await renderLibrary(); return; }
+    await importFiles([new File([await r.blob()], PRECARGADO[1], { type:'application/vnd.google-earth.kmz' })]);
+  }catch(e){ console.warn('precarga', e); }
 }
 /* Archivos que llegan desde "Compartir" (Android) o "Abrir con" (computadora) */
 async function receiveShared(){

@@ -1,7 +1,7 @@
 /* Service worker: guarda la app en el teléfono para que abra sin internet */
-const CACHE = 'taca-mapas-v1';
+const CACHE = 'taca-mapas-v2';
 const ASSETS = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png', './pdf.min.js', './pdf.worker.min.js',
-  './precargados/maestro-lotes-26-27.kmz', './precargados/mosaico-lotes-inafeb-26-27.kmz', './precargados/terceros-26-27.kmz'];
+  './precargados/lotes-taca-26-27.kmz'];
 
 const TILES = 'teselas-v1', MAX_TILES = 6000;
 const TILE_HOSTS = /(^mt\d\.google\.com$)|(^server\.arcgisonline\.com$)|(^tile\.openstreetmap\.org$)/;
