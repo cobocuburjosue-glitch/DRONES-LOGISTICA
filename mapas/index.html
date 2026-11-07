@@ -831,8 +831,9 @@ input,select,textarea{font:inherit}
 .attr input{flex:1;min-width:0;border:1px solid var(--line);border-radius:10px;padding:9px 10px;background:#fbfaf8}
 .attr button{width:36px;flex:none;border-radius:10px;background:#eeebe5;font-size:18px}
 label.btn{cursor:pointer}
-.lbl{background:rgba(255,255,255,.92);border:1.5px solid #0f555b;border-radius:7px;box-shadow:0 1px 4px rgba(0,0,0,.35);padding:1px 6px;font-weight:800;font-size:12px;line-height:16px;color:#0f555b;letter-spacing:.3px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.lbl{background:rgba(255,255,255,.92);border:1.5px solid #0f555b;border-radius:7px;box-shadow:0 1px 4px rgba(0,0,0,.35);padding:1px 6px 2px;font-weight:800;font-size:12px;line-height:14px;text-align:center;color:#0f555b;letter-spacing:.3px;white-space:nowrap;font-variant-numeric:tabular-nums}
 .lbl::before{display:none}
+.lbl small{display:block;font-size:8.5px;line-height:10px;font-weight:700;color:#4b5563;letter-spacing:.4px;text-align:center}
 .leaflet-popup-content{margin:12px 14px;font-size:14px;line-height:1.4}
 .leaflet-popup-content table{border-collapse:collapse;font-size:13px}
 .leaflet-popup-content td{padding:2px 6px 2px 0;vertical-align:top}
@@ -1681,7 +1682,7 @@ function descRows(html){
 }
 function featPopup(f){
   const p=f.properties||{}, name=p.name||p.Name||p.NOMBRE||p.nombre||'';
-  const rows=Object.entries(p).filter(([k,v])=>!STYLE_KEYS.has(k)&&!/^label-|^icon-|^description$/.test(k)&&k!=='name'&&v!==null&&v!==''&&typeof v!=='object').slice(0,25)
+  const rows=Object.entries(p).filter(([k,v])=>!STYLE_KEYS.has(k)&&!/^label-|^icon-|^description$|^Sigla$/.test(k)&&k!=='name'&&v!==null&&v!==''&&typeof v!=='object').slice(0,25)
     .map(([k,v])=>`<tr><td>${esc(k)}</td><td>${esc(typeof v==='number'?fmtNum(v):v)}</td></tr>`);
   descRows(p.description).slice(0,30).forEach(([k,v])=>rows.push(k?`<tr><td>${esc(k)}</td><td><b>${esc(v)}</b></td></tr>`:`<tr><td colspan="2">${esc(v)}</td></tr>`));
   return `${name?`<div class="pop-title">${esc(name)}</div>`:''}${rows.length?`<table>${rows.join('')}</table>`:''}` || 'Sin atributos';
@@ -1707,7 +1708,7 @@ function buildLayer(meta,data){
       // etiquetas de texto (nombres de lote): solo se muestran con zoom cercano
       const lg=L.layerGroup();
       labels.forEach(f=>{ const c=f.geometry.coordinates, ll=[c[1],c[0]];
-        const t=L.tooltip({ permanent:true, direction:'center', className:'lbl', interactive:true }).setLatLng(ll).setContent(esc((f.properties||{}).name||''));
+        const t=L.tooltip({ permanent:true, direction:'center', className:'lbl', interactive:true }).setLatLng(ll).setContent(esc((f.properties||{}).name||'')+((f.properties||{}).Sigla?`<small>${esc(f.properties.Sigla)}</small>`:''));
         t.on('click',e=>{ if(e&&e.originalEvent) L.DomEvent.stopPropagation(e); if(modeTap(ll)) return; open(f,ll); }); lg.addLayer(t); });
       const minZ=labels.length>80?14:12, todas=lg.getLayers(); lg.clearLayers();
       // solo se dibujan las etiquetas que caen en pantalla (con miles de lotes el mapa sigue fluido)
@@ -1716,7 +1717,7 @@ function buildLayer(meta,data){
         const b=view.map.getBounds().pad(0.25), puestas=[];
         // no se encima una etiqueta sobre otra: si choca, se esconde hasta acercarse más
         todas.forEach(t=>{ let vis=b.contains(t.getLatLng());
-          if(vis){ const q=view.map.latLngToContainerPoint(t.getLatLng()); vis=!puestas.some(o=>Math.abs(o.x-q.x)<66&&Math.abs(o.y-q.y)<22); if(vis) puestas.push(q); }
+          if(vis){ const q=view.map.latLngToContainerPoint(t.getLatLng()); vis=!puestas.some(o=>Math.abs(o.x-q.x)<66&&Math.abs(o.y-q.y)<32); if(vis) puestas.push(q); }
           if(vis&&!lg.hasLayer(t)) lg.addLayer(t); else if(!vis&&lg.hasLayer(t)) lg.removeLayer(t); });
         if(!view.map.hasLayer(lg)) lg.addTo(view.map); };
       g.on('add',()=>{ view.map.on('moveend',upd); upd(); });
@@ -1891,7 +1892,7 @@ function lotAt(lat,lng){
       if(!r._bb){ let a=[180,90,-180,-90]; ps.forEach(p=>p[0].forEach(q=>{ a[0]=Math.min(a[0],q[0]); a[1]=Math.min(a[1],q[1]); a[2]=Math.max(a[2],q[0]); a[3]=Math.max(a[3],q[1]); })); r._bb=a; }
       const b=r._bb; if(lng<b[0]||lng>b[2]||lat<b[1]||lat>b[3]) continue;
       if(ps.some(p=>inRing(lng,lat,p[0]) && !p.slice(1).some(h=>inRing(lng,lat,h)))){
-        const pr=r.f.properties||{}, m={}; Object.entries(pr).forEach(([k,v])=>{ if(typeof v!=='object'&&!STYLE_KEYS.has(k)&&!/^label-|^icon-|^description$/.test(k)) m[k]=v; });
+        const pr=r.f.properties||{}, m={}; Object.entries(pr).forEach(([k,v])=>{ if(typeof v!=='object'&&!STYLE_KEYS.has(k)&&!/^label-|^icon-|^description$|^Sigla$/.test(k)) m[k]=v; });
         descRows(pr.description).forEach(([k,v])=>{ if(k) m[k]=v; }); if(pr.name&&!m.Nombre) m._name=pr.name; return m; } } }
   return null;
 }
@@ -2292,16 +2293,19 @@ if('serviceWorker' in navigator && /^https?:$/.test(location.protocol)){ navigat
 /* Mapa de Soluciones TACA que viene ya cargado: un solo mapa con todos los lotes y su número.
    Se revisa en la base del teléfono (no en una marca aparte), así siempre queda uno y sin duplicados. */
 const PRECARGADO=['precargados/lotes-taca-26-27.kmz','Lotes TACA 26-27.kmz'];
+const PRECARGADO_VER='2';   // subir este número cuando cambie el mapa, para que se reemplace en los teléfonos
 const PRECARGADOS_VIEJOS=['Maestro lotes 26-27 oficial agosto.kmz','Mosaico lotes INAFEB 26-27.kmz','Terceros oficial 26-27.kmz'];
 async function precargarTACA(){
   try{
     const maps=await dbAll('maps');
-    const viejos=maps.filter(m=>PRECARGADOS_VIEJOS.includes(m.file));
+    let ver=''; try{ ver=localStorage.getItem('taca-lotes-ver')||''; }catch(e){}
+    const viejos=maps.filter(m=>PRECARGADOS_VIEJOS.includes(m.file)||(ver!==PRECARGADO_VER&&m.file===PRECARGADO[1]));
     for(const m of viejos){ const fs=await featsOf(m.id); await tx(['maps','data','feats'],'readwrite',t=>{ t.objectStore('maps').delete(m.id); t.objectStore('data').delete(m.id); fs.forEach(f=>t.objectStore('feats').delete(f.id)); }); }
-    const ya=maps.some(m=>m.file===PRECARGADO[1]);
+    const ya=ver===PRECARGADO_VER&&maps.some(m=>m.file===PRECARGADO[1]);
     if(ya){ if(viejos.length) await renderLibrary(); return; }
     const r=await fetch(PRECARGADO[0]); if(!r.ok){ if(viejos.length) await renderLibrary(); return; }
     await importFiles([new File([await r.blob()], PRECARGADO[1], { type:'application/vnd.google-earth.kmz' })]);
+    if((await dbAll('maps')).some(m=>m.file===PRECARGADO[1])) try{ localStorage.setItem('taca-lotes-ver', PRECARGADO_VER); }catch(e){}
   }catch(e){ console.warn('precarga', e); }
 }
 /* Archivos que llegan desde "Compartir" (Android) o "Abrir con" (computadora) */

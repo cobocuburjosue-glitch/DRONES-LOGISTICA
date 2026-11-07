@@ -1,5 +1,5 @@
 /* Service worker: guarda la app en el teléfono para que abra sin internet */
-const CACHE = 'taca-mapas-v2';
+const CACHE = 'taca-mapas-v3';
 const ASSETS = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png', './pdf.min.js', './pdf.worker.min.js',
   './precargados/lotes-taca-26-27.kmz'];
 
