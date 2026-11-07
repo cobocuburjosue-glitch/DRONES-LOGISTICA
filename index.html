@@ -642,7 +642,7 @@
       <button class="modulo solo-piloto" type="button" data-ir="convertidor" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h13l-3-3"/><path d="M20 16H7l3 3"/></svg><strong>Convertidor de flujos</strong></button>
       <button class="modulo solo-campo" type="button" data-ir="mezclas" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3h6"/><path d="M10 3v6L5 18a2 2 0 0 0 1.8 3h10.4A2 2 0 0 0 19 18l-5-9V3"/><path d="M7.5 15h9"/></svg><strong>Mezclas TACA</strong></button>
       <button class="modulo solo-piloto-admin" type="button" data-ir="vuelos" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><strong>Dashboard vuelos drones</strong></button>
-      <a class="modulo" href="mapas/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2z"/><path d="M9 4v14M15 6v14"/></svg><strong>Mapa Avenza</strong></a>
+      <a class="modulo" href="mapas/" onclick="try{sessionStorage.setItem('taca-volver','menu')}catch(e){}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2z"/><path d="M9 4v14M15 6v14"/></svg><strong>Mapa Avenza</strong></a>
       <button class="modulo solo-admin" type="button" data-ir="control" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg><strong>Centro de control</strong></button>
       <button class="modulo" type="button" data-ir="permisos" id="opPermisos" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 11-5.7"/><rect x="15" y="15" width="7" height="6" rx="1"/><path d="M16.5 15v-1.5a2 2 0 0 1 4 0V15"/></svg><strong>Permisos de edición</strong><em class="estado pend" id="estadoSolicitudes" hidden></em></button>
     </div>
@@ -651,8 +651,8 @@
   <button type="button" class="chat-flotante" data-ir="chat" aria-label="Abrir Chat Equipo TACA">
     <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-5A8 8 0 1 1 21 12z"/></svg>
     <span class="globo" id="chatGlobo" hidden></span></button>
-  <div class="version-tarjeta">
-    <div><b>Versión 7 nov 2026</b><span>Nuevo inicio y menú, Mapa Avenza</span></div>
+  <div class="version-tarjeta" id="tarjetaVersion" hidden>
+    <div><b>Hay una versión nueva</b><span>Toque Actualizar para cargarla</span></div>
     <button type="button" id="btnActualizar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 18a4.5 4.5 0 0 1-.6-9A6 6 0 0 1 18 9.5a4 4 0 0 1-.5 8.5"/><path d="M12 12v8M9 17l3 3 3-3"/></svg>Actualizar</button>
   </div>
   <div class="pendientes" id="avisoPendientes" hidden>
@@ -3457,6 +3457,9 @@ window.addEventListener('appinstalled', () => { $('btnInstalar').hidden = true; 
     try { await cargarCatalogos(); } catch {}
     if (catalogos) {
       entrar();
+      // regresando de Mapa Avenza: directo al menú, sin pasar por la bienvenida
+      let volver = null; try { volver = sessionStorage.getItem('taca-volver'); sessionStorage.removeItem('taca-volver'); } catch {}
+      if (volver === 'menu') mostrar('menu');
       if (new URLSearchParams(location.search).get('abrir') === 'chat') { history.replaceState(null, '', location.pathname); setTimeout(() => mostrar('chat'), 300); }
       return;
     }
@@ -3469,6 +3472,13 @@ window.addEventListener('appinstalled', () => { $('btnInstalar').hidden = true; 
   const sl = document.querySelector('#portada .slide'), h = document.querySelector('.menu-heroe');
   if (sl && h) h.style.setProperty('--heroe', sl.style.backgroundImage);
   const b = $('btnActualizar'); if (!b) return;
+  // la tarjeta solo se muestra si hay una versión nueva esperando; si la app ya está al día, no aparece
+  const tarjeta = $('tarjetaVersion'), mostrarT = () => { tarjeta.hidden = false; };
+  navigator.serviceWorker?.getRegistration().then(r => {
+    if (!r) return;
+    if (r.waiting) mostrarT();
+    r.addEventListener('updatefound', () => { if (navigator.serviceWorker.controller) mostrarT(); });
+  }).catch(() => {});
   b.onclick = async () => {
     if (!navigator.onLine) { b.lastChild.textContent = 'Sin señal'; setTimeout(() => b.lastChild.textContent = 'Actualizar', 2000); return; }
     b.disabled = true; b.lastChild.textContent = 'Buscando…';
