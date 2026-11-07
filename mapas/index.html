@@ -1005,7 +1005,7 @@ const canvasToBlob = (cv, type='image/png', q) => new Promise(r => cv.toBlob(r, 
 
 /* ---------- base de datos local (IndexedDB) ---------- */
 let db;
-function openDB(){ return new Promise((res,rej)=>{ const r=indexedDB.open('mapas-de-campo',1);
+function openDB(){ return new Promise((res,rej)=>{ const r=indexedDB.open('taca-mapa-avenza',1);
   r.onupgradeneeded=()=>{ const d=r.result; d.createObjectStore('maps',{keyPath:'id'}); d.createObjectStore('data',{keyPath:'id'});
     d.createObjectStore('feats',{keyPath:'id'}).createIndex('mapId','mapId'); };
   r.onsuccess=()=>{ db=r.result; res(); }; r.onerror=()=>rej(r.error); }); }
