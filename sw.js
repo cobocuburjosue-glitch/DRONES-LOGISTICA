@@ -2,7 +2,7 @@
    1. Guarda la app para abrirla sin señal (siempre intenta traer la versión más nueva primero).
    2. Guarda la librería de gráficas y las fuentes para ver gráficas sin señal.
    3. Envía los registros pendientes en segundo plano cuando vuelve la señal (Background Sync en Android). */
-const CACHE = 'taca-v21';
+const CACHE = 'taca-v22';
 const ARCHIVOS = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png'];
 const OPCIONALES = ['./chart.umd.js', 'https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js'];
 const API_POR_DEFECTO = 'https://script.google.com/macros/s/AKfycbwIbnegW9MqqQ8S0y_06nCOdHvtf2rHyTRaovvJxlw58KXLXdji0sP3infV3nddNXbP/exec';
@@ -18,7 +18,8 @@ self.addEventListener('install', e => {
 
 self.addEventListener('activate', e => {
   e.waitUntil(caches.keys()
-    .then(ks => Promise.all(ks.filter(k => k !== CACHE).map(k => caches.delete(k))))
+    // solo borra copias viejas de la app TACA (en el mismo dominio viven también los mapas)
+    .then(ks => Promise.all(ks.filter(k => k.startsWith('taca-v') && k !== CACHE).map(k => caches.delete(k))))
     .then(() => self.clients.claim()));
 });
 
