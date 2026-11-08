@@ -467,6 +467,63 @@
   .chat-flotante .globo { position: absolute; top: -4px; right: -4px; min-width: 22px; height: 22px; padding: 0 6px; border-radius: 999px;
     background: var(--alerta); color: #fff; font-size: .78rem; font-weight: 700; display: grid; place-items: center; border: 2px solid var(--fondo); }
 
+
+  /* ===== Diseño interno de módulos (estilo del menú nuevo) ===== */
+  :root { --teal-1: #0d3a40; --teal-2: #072226; --teal-borde: rgba(79,209,220,.45); --teal-luz: #8ff0f7; }
+  .pantalla:not(#menu) > .barra:first-child { position: relative; overflow: hidden; margin: 0 0 16px; padding: 14px 16px; min-height: 76px; border-radius: 16px;
+    background: linear-gradient(135deg, var(--teal-1) 0%, var(--teal-2) 100%); border: 1.5px solid var(--teal-borde); box-shadow: 0 6px 18px rgba(0,0,0,.25); color: #fff; justify-content: flex-start; gap: 12px; }
+  .pantalla:not(#menu) > .barra:first-child::after { content: ""; position: absolute; right: -30px; top: -40px; width: 140px; height: 140px; border-radius: 50%; background: radial-gradient(circle, rgba(79,209,220,.22), transparent 70%); }
+  .pantalla:not(#menu) > .barra:first-child .volver { order: 0; width: 40px; height: 40px; flex: none; border-radius: 12px; padding: 0; font-size: 0; color: #fff;
+    background: rgba(255,255,255,.08); border: 1.5px solid rgba(143,240,247,.35); display: grid; place-items: center; }
+  .pantalla:not(#menu) > .barra:first-child .volver::before { content: "‹"; font-size: 1.9rem; line-height: 1; margin-top: -3px; }
+  .pantalla:not(#menu) > .barra:first-child h2 { order: 2; margin: 0; color: #fff; font-size: 1.5rem; flex: 1; }
+  .icono-mod { order: 1; flex: none; width: 46px; height: 46px; border-radius: 13px; display: grid; place-items: center; background: rgba(79,209,220,.14); border: 1.5px solid rgba(79,209,220,.6); color: var(--teal-luz); }
+  .icono-mod svg { width: 26px; height: 26px; }
+  .pantalla:not(#menu) > .barra:first-child > :not(.volver):not(h2):not(.icono-mod) { order: 3; }
+  .pestanas { background: var(--papel-2); border: 1px solid var(--linea); border-radius: 14px; padding: 5px; }
+  .pestanas button { border-radius: 10px; font-size: .95rem; }
+  .pestanas button[aria-selected=true] { background: linear-gradient(180deg, #1aa3ad, #0f7a83); color: #fff; box-shadow: 0 3px 10px rgba(15,122,131,.35); }
+  .filtros { gap: 10px; }
+  .filtros label { min-width: 0; background: var(--papel); border: 1px solid var(--linea); border-radius: 14px; padding: 10px 12px 12px; }
+  .filtros label span { font-size: .78rem; text-transform: uppercase; letter-spacing: .06em; color: var(--azul-texto); }
+  .filtros input, .filtros select { width: 100%; min-width: 0; border-radius: 10px !important; min-height: 46px; font-size: .95rem; }
+  .rapidos { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; margin: 12px -2px 16px; }
+  .rapidos::-webkit-scrollbar { display: none; }
+  .rapidos .chip { flex: none; min-height: 38px; padding: 7px 15px; font-size: .92rem; }
+  .rapidos .chip[aria-pressed=true] { background: linear-gradient(180deg, #1aa3ad, #0f7a83); border-color: transparent; }
+  .totales { background: none !important; border: 0 !important; gap: 10px !important; overflow: visible !important; }
+  .totales > div { position: relative; border-radius: 14px; border: 1px solid var(--linea); padding: 12px 12px 12px !important; overflow: hidden; }
+  .totales > div::before { content: ""; position: absolute; left: 0; top: 0; right: 0; height: 3px; background: linear-gradient(90deg, #1aa3ad, rgba(26,163,173,0)); }
+  .totales .ico-kpi { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 9px; margin-bottom: 8px; background: var(--azul-claro); color: var(--azul-texto); }
+  .totales .ico-kpi svg { width: 18px; height: 18px; }
+  .totales .num { font-size: clamp(1rem, 4.4vw, 1.6rem) !important; white-space: nowrap; letter-spacing: -.01em; }
+  .totales small { display: block; margin-top: 4px; font-size: .78rem; line-height: 1.25; }
+  .grafica { border-radius: 16px; border: 1px solid var(--linea); box-shadow: 0 4px 14px rgba(0,0,0,.08); }
+  .grafica > h2, .grafica > .barra h2 { display: flex; align-items: center; gap: 10px; font-size: 1.15rem; }
+  .grafica > h2::before, .grafica > .barra h2::before { content: ""; flex: none; width: 4px; height: 20px; border-radius: 3px; background: linear-gradient(180deg, #4fd1dc, #0f7a83); }
+  .grafica .sub { margin-left: 14px; }
+  .btn-editar { border-radius: 10px; }
+  /* tablas: en el teléfono cada fila se ve como una tarjeta, sin columnas cortadas */
+  @media (max-width: 640px) {
+    .tabla-tarjetas thead { display: none; }
+    .tabla-tarjetas, .tabla-tarjetas tbody { display: block; width: 100%; }
+    .tabla-tarjetas tr { position: relative; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px 10px; padding: 12px 14px; margin-bottom: 10px; border-radius: 14px;
+      border: 1px solid var(--linea); background: var(--papel-2); }
+    .tabla-tarjetas td { display: block; border: 0; padding: 0; white-space: normal; text-align: left !important; min-width: 0; }
+    .tabla-tarjetas td::before { content: attr(data-label); display: block; font-size: .7rem; text-transform: uppercase; letter-spacing: .03em; color: var(--gris); font-weight: 600; margin-bottom: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .tabla-tarjetas td:first-child { grid-column: 1 / -1; padding-bottom: 6px; border-bottom: 1px dashed var(--linea); }
+    .tabla-tarjetas td:first-child::before { display: none; }
+    .tabla-tarjetas td:first-child b, .tabla-tarjetas td:first-child strong { font-size: 1.05rem; color: var(--azul-texto); }
+    .tabla-tarjetas td[data-label=""]::before { display: none; }
+    .tabla-tarjetas td:empty { display: none; }
+    .tabla-tarjetas td.n { font-weight: 700; font-variant-numeric: tabular-nums; }
+    .tabla-tarjetas td[colspan] { grid-column: 1 / -1; }
+    .tabla-tarjetas td:first-child { padding-right: 96px; }
+    .tabla-tarjetas td:has(> .btn-editar) { position: absolute; top: 12px; right: 12px; }
+    .tabla-tarjetas td:has(> .btn-editar) .btn-editar { min-height: 34px; padding: 4px 12px; font-size: .85rem; }
+    .tabla-tarjetas td { font-size: .9rem; }
+  }
+
   /* ===== Menú principal (diseño oscuro con módulos destacados) ===== */
   #menu { max-width: none; position: relative; min-height: 100vh; color: #e8f4f5; isolation: isolate;
     background: linear-gradient(180deg, #082b30 0%, #061c20 45%, #04191c 100%); padding: 16px 0 110px; }
@@ -643,7 +700,7 @@
       <button class="modulo solo-piloto" type="button" data-ir="convertidor" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h13l-3-3"/><path d="M20 16H7l3 3"/></svg><strong>Convertidor de flujos</strong></button>
       <button class="modulo solo-campo" type="button" data-ir="mezclas" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3h6"/><path d="M10 3v6L5 18a2 2 0 0 0 1.8 3h10.4A2 2 0 0 0 19 18l-5-9V3"/><path d="M7.5 15h9"/></svg><strong>Mezclas TACA</strong></button>
       <button class="modulo solo-piloto-admin" type="button" data-ir="vuelos" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><strong>Dashboard vuelos drones</strong></button>
-      <a class="modulo" href="mapas/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2z"/><path d="M9 4v14M15 6v14"/></svg><strong>Mapa Avenza</strong></a>
+      <a class="modulo" href="mapas/" onclick="try{sessionStorage.setItem('taca-volver','menu')}catch(e){}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2z"/><path d="M9 4v14M15 6v14"/></svg><strong>Mapa Avenza</strong></a>
       <button class="modulo solo-admin" type="button" data-ir="control" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg><strong>Centro de control</strong></button>
       <button class="modulo" type="button" data-ir="permisos" id="opPermisos" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 11-5.7"/><rect x="15" y="15" width="7" height="6" rx="1"/><path d="M16.5 15v-1.5a2 2 0 0 1 4 0V15"/></svg><strong>Permisos de edición</strong><em class="estado pend" id="estadoSolicitudes" hidden></em></button>
     </div>
@@ -652,9 +709,8 @@
   <button type="button" class="chat-flotante" data-ir="chat" aria-label="Abrir Chat Equipo TACA">
     <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-5A8 8 0 1 1 21 12z"/></svg>
     <span class="globo" id="chatGlobo" hidden></span></button>
-  <p style="text-align:center;color:#fbbf24;font-weight:700;margin:16px auto 0">VISTA PREVIA · nuevo diseño</p>
-  <div class="version-tarjeta">
-    <div><b>Versión 7 nov 2026</b><span>Mapa Avenza y piloto, camión y drones en General</span></div>
+  <div class="version-tarjeta" id="tarjetaVersion" hidden>
+    <div><b>Hay una versión nueva</b><span>Toque Actualizar para cargarla</span></div>
     <button type="button" id="btnActualizar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 18a4.5 4.5 0 0 1-.6-9A6 6 0 0 1 18 9.5a4 4 0 0 1-.5 8.5"/><path d="M12 12v8M9 17l3 3 3-3"/></svg>Actualizar</button>
   </div>
   <div class="pendientes" id="avisoPendientes" hidden>
@@ -3459,6 +3515,9 @@ window.addEventListener('appinstalled', () => { $('btnInstalar').hidden = true; 
     try { await cargarCatalogos(); } catch {}
     if (catalogos) {
       entrar();
+      // regresando de Mapa Avenza: directo al menú, sin pasar por la bienvenida
+      let volver = null; try { volver = sessionStorage.getItem('taca-volver'); sessionStorage.removeItem('taca-volver'); } catch {}
+      if (volver === 'menu') mostrar('menu');
       if (new URLSearchParams(location.search).get('abrir') === 'chat') { history.replaceState(null, '', location.pathname); setTimeout(() => mostrar('chat'), 300); }
       return;
     }
@@ -3471,6 +3530,13 @@ window.addEventListener('appinstalled', () => { $('btnInstalar').hidden = true; 
   const sl = document.querySelector('#portada .slide'), h = document.querySelector('.menu-heroe');
   if (sl && h) h.style.setProperty('--heroe', sl.style.backgroundImage);
   const b = $('btnActualizar'); if (!b) return;
+  // la tarjeta solo se muestra si hay una versión nueva esperando; si la app ya está al día, no aparece
+  const tarjeta = $('tarjetaVersion'), mostrarT = () => { tarjeta.hidden = false; };
+  navigator.serviceWorker?.getRegistration().then(r => {
+    if (!r) return;
+    if (r.waiting) mostrarT();
+    r.addEventListener('updatefound', () => { if (navigator.serviceWorker.controller) mostrarT(); });
+  }).catch(() => {});
   b.onclick = async () => {
     if (!navigator.onLine) { b.lastChild.textContent = 'Sin señal'; setTimeout(() => b.lastChild.textContent = 'Actualizar', 2000); return; }
     b.disabled = true; b.lastChild.textContent = 'Buscando…';
@@ -3484,6 +3550,41 @@ window.addEventListener('appinstalled', () => { $('btnInstalar').hidden = true; 
   const o = $('verClave'); if (!o) return;
   o.onclick = e => { e.preventDefault(); const c = $('loginClave'), ver = c.type === 'password';
     c.type = ver ? 'text' : 'password'; o.classList.toggle('visto', ver); o.setAttribute('aria-label', ver ? 'Ocultar contraseña' : 'Mostrar contraseña'); };
+})();
+
+/* Diseño interno: ícono en el encabezado de cada módulo, íconos en los totales y tablas como tarjetas en el teléfono */
+(() => {
+  const sv = p => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${p}</svg>`;
+  const IC = {
+    general: '<circle cx="5" cy="6" r="2.4"/><circle cx="19" cy="6" r="2.4"/><circle cx="5" cy="18" r="2.4"/><circle cx="19" cy="18" r="2.4"/><path d="M7 7.5l3 3M17 7.5l-3 3M7 16.5l3-3M17 16.5l-3-3"/><rect x="9.5" y="9.5" width="5" height="5" rx="1.2"/>',
+    checklist: '<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1"/><path d="M8.5 11l1.6 1.6L13 9.7"/><path d="M8.5 16.5h7"/>',
+    registro: '<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h4"/>',
+    horometro: '<circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5"/><path d="M10 2h4"/>',
+    convertidor: '<path d="M4 8h13l-3-3"/><path d="M20 16H7l3 3"/>',
+    mezclas: '<path d="M9 3h6"/><path d="M10 3v6L5 18a2 2 0 0 0 1.8 3h10.4A2 2 0 0 0 19 18l-5-9V3"/><path d="M7.5 15h9"/>',
+    control: '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/>',
+    vuelos: '<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
+    chat: '<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-5A8 8 0 1 1 21 12z"/>',
+    reportes: '<rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 17v-4M12 17V8M16 17v-6"/>',
+    permisos: '<circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 11-5.7"/><rect x="15" y="15" width="7" height="6" rx="1"/><path d="M16.5 15v-1.5a2 2 0 0 1 4 0V15"/>',
+  };
+  document.querySelectorAll('.pantalla:not(#menu)').forEach(sec => {
+    const b = sec.querySelector(':scope > .barra'); if (!b || !IC[sec.id] || b.querySelector('.icono-mod')) return;
+    const i = document.createElement('span'); i.className = 'icono-mod'; i.innerHTML = sv(IC[sec.id]); b.appendChild(i);
+  });
+  const KPI = [[/quetzal|costo|monto/i, '<circle cx="12" cy="12" r="9"/><path d="M14.5 9.5a2.5 2.5 0 0 0-5 0c0 3 5 2 5 5a2.5 2.5 0 0 1-5 0M12 6v1.5M12 16.5V18"/>'], [/hect|área/i, '<path d="M3 20l5-9 4 6 3-4 6 7z"/><circle cx="17" cy="6" r="2.5"/>'], [/quetzal|q\b|costo|monto/i, '<circle cx="12" cy="12" r="9"/><path d="M14.5 9.5a2.5 2.5 0 0 0-5 0c0 3 5 2 5 5a2.5 2.5 0 0 1-5 0M12 6v1.5M12 16.5V18"/>'],
+    [/registro|tancada|check/i, '<path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"/>'], [/vuelo/i, '<path d="M2 16l20-8-8 12-2-6z"/>'], [/hora/i, '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'],
+    [/litro|mezcla|dosis|variaci/i, '<path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"/>'], [/.*/, '<path d="M4 20V10M10 20V4M16 20v-7"/>']];
+  document.querySelectorAll('.totales > div').forEach(d => {
+    if (d.querySelector('.ico-kpi')) return; const t = (d.querySelector('small') || d).textContent;
+    const p = KPI.find(([r]) => r.test(t))[1]; const i = document.createElement('span'); i.className = 'ico-kpi'; i.innerHTML = sv(p); d.prepend(i);
+  });
+  const etiquetar = tb => {
+    const tabla = tb.closest('table'); if (!tabla) return; const ths = [...tabla.querySelectorAll('thead th')].map(t => t.textContent.trim().replace(/^Ha-Quetzales$/i, 'Quetzales'));
+    if (ths.length < 3) return; tabla.classList.add('tabla-tarjetas');
+    tb.querySelectorAll('tr').forEach(tr => [...tr.children].forEach((td, k) => { if (!td.hasAttribute('colspan')) td.dataset.label = ths[k] || ''; }));
+  };
+  document.querySelectorAll('.tabla-envoltura tbody').forEach(tb => { etiquetar(tb); new MutationObserver(() => etiquetar(tb)).observe(tb, { childList: true }); });
 })();
 </script>
 </body>
